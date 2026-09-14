@@ -1,35 +1,37 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { Montserrat, Overpass } from 'next/font/google'
-import { cn } from '@/lib/utils'
+import type { Metadata } from "next";
+import { Montserrat, Overpass } from "next/font/google";
+import "./globals.css";
 
-const montserrat = Montserrat({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  weight: ['400', '500', '600', '700', '800', '900'],
-})
+// Configure core brand fonts
+const montserrat = Montserrat({ 
+  subsets: ["latin"], 
+  variable: "--font-montserrat" 
+});
 
-const overpass = Overpass({
-  subsets: ['latin'],
-  variable: '--font-heading',
-  weight: ['600', '800'],
-})
+const overpass = Overpass({ 
+  subsets: ["latin"], 
+  variable: "--font-overpass" 
+});
 
 export const metadata: Metadata = {
-  title: 'Trim Key Flow — Command Center',
-  description: 'Payment Infrastructure & Orchestration Platform',
-}
+  title: "Trim Key Flow | Gateway Operations",
+  description: "Advanced multi-gateway payment routing and management.",
+};
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className={cn('dark', montserrat.variable, overpass.variable)}>
-      <body className="bg-[#0B111E] text-[#F1F5F9] font-sans min-h-screen antialiased selection:bg-[#26C3EA]/20 selection:text-[#26C3EA]">
+    <html lang="en" className="dark">
+      <body
+        className={`${montserrat.variable} ${overpass.variable} font-overpass bg-background text-foreground antialiased min-h-screen selection:bg-primary/30`}
+      >
+        {/* Global blurred background element for depth */}
+        <div className="fixed inset-0 -z-10 bg-dark-mesh bg-cover bg-center bg-no-repeat" />
         {children}
       </body>
     </html>
-  )
+  );
 }
