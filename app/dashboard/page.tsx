@@ -1,7 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
 
 async function getDashboardStats(organizationId: string) {
   const db = createAdminClient()
@@ -51,40 +50,54 @@ export default async function DashboardPage() {
     ? await getDashboardStats(member.organization_id)
     : { todayVolume: 0, monthVolume: 0, successCount: 0, failedCount: 0, processingCount: 0, todayCount: 0 }
 
-  const statCards = [
-    { label: "Today's Payments", value: stats.todayCount.toString(), sub: formatAmount(stats.todayVolume) },
-    { label: 'This Month Volume', value: formatAmount(stats.monthVolume), sub: 'All transaction statuses' },
-    { label: 'Successful', value: stats.successCount.toString(), sub: 'This month completed' },
-    { label: 'Failed', value: stats.failedCount.toString(), sub: 'Requires review' },
-    { label: 'Processing', value: stats.processingCount.toString(), sub: 'In-flight orders' },
+  const kpis = [
+    { label: "Today's Payments", value: stats.todayCount.toString(), sub: formatAmount(stats.todayVolume), borderClass: 'b-brand' },
+    { label: 'Month Volume', value: formatAmount(stats.monthVolume), sub: 'All transactions', borderClass: 'b-info' },
+    { label: 'Successful', value: stats.successCount.toString(), sub: 'Captured successfully', borderClass: 'b-success' },
+    { label: 'Failed', value: stats.failedCount.toString(), sub: 'Requires inspection', borderClass: 'b-danger' },
+    { label: 'Processing', value: stats.processingCount.toString(), sub: 'Awaiting webhook', borderClass: 'b-accent' },
   ]
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Overview</h1>
-        <p className="text-muted-foreground text-sm mt-1">Payment orchestration performance and volume summaries</p>
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
+        <div>
+          <h1 className="font-heading text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase">
+            Overview & Telemetry
+          </h1>
+          <p className="text-xs md:text-sm font-medium text-[#94A3B8] mt-1">
+            Real-time transaction volumes and gateway health indicators
+          </p>
+        </div>
+
+        <Link
+          href="/dashboard/transactions"
+          className="btn-brand inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs uppercase tracking-wider font-extrabold shadow-sm w-fit"
+        >
+          <span>View All Transactions</span>
+          <span>→</span>
+        </Link>
       </div>
 
+      {/* KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {statCards.map((card) => (
-          <Card key={card.label} className="border-border bg-card">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-xs uppercase font-medium tracking-wider text-muted-foreground">
-                {card.label}
-              </CardDescription>
-              <CardTitle className="text-2xl font-bold text-foreground mt-1">
-                {card.value}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">{card.sub}</p>
-            </CardContent>
-          </Card>
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className={`kpi-card ${kpi.borderClass}`}>
+            <h4 className="text-[11px] font-extrabold uppercase tracking-widest text-[#94A3B8] mb-2">
+              {kpi.label}
+            </h4>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-1 text-white">
+              {kpi.value}
+            </h2>
+            <p className="text-[11px] font-semibold text-[#94A3B8] opacity-80">
+              {kpi.sub}
+            </p>
+          </div>
         ))}
       </div>
 
-      {/* Recent Payments */}
+      {/* Recent Payments Panel */}
       <RecentPayments />
     </div>
   )
@@ -99,47 +112,71 @@ async function RecentPayments() {
     .limit(10)
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader>
-        <CardTitle className="text-lg">Recent Payments</CardTitle>
-        <CardDescription>Latest transactions dispatched through Trim Key Flow</CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y divide-border">
-          {(payments ?? []).length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-12">No payments yet</p>
-          ) : (
-            (payments ?? []).map((p: Record<string, unknown>) => (
-              <div key={p.payment_number as string} className="px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                <div className="space-y-1">
-                  <p className="text-foreground text-sm font-mono font-medium">{p.payment_number as string}</p>
-                  <p className="text-muted-foreground text-xs">{(p.merchants as { name: string } | null)?.name ?? '—'}</p>
-                </div>
-                <div className="text-right space-y-1.5">
-                  <p className="text-foreground text-sm font-semibold">₹{(Number(p.amount) / 100).toFixed(2)}</p>
-                  <StatusBadge status={p.status as string} />
-                </div>
-              </div>
-            ))
-          )}
+    <div className="bg-[#141E30] rounded-2xl border border-white/[0.08] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="px-6 py-4 border-b border-white/[0.08] flex items-center justify-between">
+        <div>
+          <h3 className="font-heading text-sm font-extrabold tracking-wider uppercase text-[#26C3EA]">
+            Recent Transactions
+          </h3>
+          <p className="text-[11px] font-medium text-[#94A3B8] mt-0.5">
+            Latest payments processed through Flow Orchestration
+          </p>
         </div>
-      </CardContent>
-    </Card>
+
+        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[#94A3B8]">
+          Live Ledger
+        </span>
+      </div>
+
+      <div className="divide-y divide-white/[0.05]">
+        {(payments ?? []).length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-[#94A3B8] text-sm font-semibold">No transactions recorded yet.</p>
+            <p className="text-xs text-[#94A3B8]/60 mt-1">Dispatched API calls will show here in real-time.</p>
+          </div>
+        ) : (
+          (payments ?? []).map((p: Record<string, unknown>) => (
+            <div
+              key={p.payment_number as string}
+              className="px-6 py-3.5 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+            >
+              <div className="space-y-1">
+                <p className="font-mono text-xs font-bold text-white tracking-wide">
+                  {p.payment_number as string}
+                </p>
+                <p className="text-[11px] font-medium text-[#94A3B8]">
+                  {(p.merchants as { name: string } | null)?.name ?? 'Default Merchant'}
+                </p>
+              </div>
+
+              <div className="text-right space-y-1.5">
+                <p className="font-bold text-sm text-white">
+                  ₹{(Number(p.amount) / 100).toFixed(2)}
+                </p>
+                <StatusBadge status={p.status as string} />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   )
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === 'SUCCESS') {
-    return <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20">{status}</Badge>
+  const styles: Record<string, string> = {
+    SUCCESS: 'bg-[#2ECC71]/15 text-[#2ECC71] border-[#2ECC71]/30',
+    FAILED: 'bg-[#EF4444]/15 text-[#EF4444] border-[#EF4444]/30',
+    PENDING: 'bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30',
+    PROCESSING: 'bg-[#26C3EA]/15 text-[#26C3EA] border-[#26C3EA]/30',
+    REFUNDED: 'bg-[#8B5CF6]/15 text-[#8B5CF6] border-[#8B5CF6]/30',
   }
-  if (status === 'FAILED') {
-    return <Badge variant="destructive">{status}</Badge>
-  }
-  if (status === 'PENDING') {
-    return <Badge variant="outline" className="text-amber-400 border-amber-400/40 bg-amber-400/10">{status}</Badge>
-  }
-  if (status === 'PROCESSING') {
-    return <Badge variant="secondary" className="text-blue-400 bg-blue-500/10 border-blue-500/20">{status}</Badge>
-  }
-  return <Badge variant="outline">{status}</Badge>
+
+  const cls = styles[status] ?? 'bg-white/10 text-white/80 border-white/20'
+
+  return (
+    <span className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider border ${cls}`}>
+      {status}
+    </span>
+  )
 }

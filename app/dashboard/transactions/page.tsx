@@ -1,37 +1,23 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { buttonVariants } from '@/components/ui/button'
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === 'SUCCESS') {
-    return <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">{status}</Badge>
+  const styles: Record<string, string> = {
+    SUCCESS: 'bg-[#2ECC71]/15 text-[#2ECC71] border-[#2ECC71]/30',
+    FAILED: 'bg-[#EF4444]/15 text-[#EF4444] border-[#EF4444]/30',
+    PENDING: 'bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30',
+    PROCESSING: 'bg-[#26C3EA]/15 text-[#26C3EA] border-[#26C3EA]/30',
+    REFUNDED: 'bg-[#8B5CF6]/15 text-[#8B5CF6] border-[#8B5CF6]/30',
+    PARTIALLY_REFUNDED: 'bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30',
   }
-  if (status === 'FAILED') {
-    return <Badge variant="destructive">{status}</Badge>
-  }
-  if (status === 'PENDING') {
-    return <Badge variant="outline" className="text-amber-400 border-amber-400/40 bg-amber-400/10">{status}</Badge>
-  }
-  if (status === 'PROCESSING') {
-    return <Badge variant="secondary" className="text-blue-400 bg-blue-500/10">{status}</Badge>
-  }
-  if (status === 'REFUNDED') {
-    return <Badge variant="outline" className="text-purple-400 border-purple-400/30 bg-purple-500/10">{status}</Badge>
-  }
-  if (status === 'PARTIALLY_REFUNDED') {
-    return <Badge variant="outline" className="text-orange-400 border-orange-400/30 bg-orange-500/10">{status}</Badge>
-  }
-  return <Badge variant="outline">{status}</Badge>
+
+  const cls = styles[status] ?? 'bg-white/10 text-white/80 border-white/20'
+
+  return (
+    <span className={`inline-block px-2.5 py-1 rounded text-[10px] font-extrabold uppercase tracking-wider border ${cls}`}>
+      {status}
+    </span>
+  )
 }
 
 export default async function TransactionsPage({
@@ -59,18 +45,27 @@ export default async function TransactionsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Transactions</h1>
-          <p className="text-muted-foreground text-sm mt-1">{count ?? 0} total ledger entries</p>
+          <h1 className="font-heading text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase">
+            Transactions Ledger
+          </h1>
+          <p className="text-xs md:text-sm font-medium text-[#94A3B8] mt-1">
+            Real-time audit log of all payment authorizations and settlement records ({count ?? 0} total)
+          </p>
         </div>
       </div>
 
-      {/* Filter Tabs / Pills */}
+      {/* Filter Tabs */}
       <div className="flex gap-2 flex-wrap items-center">
         <Link
           href="/dashboard/transactions"
-          className={buttonVariants({ variant: !params.status ? "default" : "outline", size: "sm" })}
+          className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
+            !params.status
+              ? 'bg-[#26C3EA] text-[#080D17] border-[#26C3EA] shadow-[0_0_15px_rgba(38,195,234,0.4)]'
+              : 'bg-white/[0.03] text-[#94A3B8] border-white/[0.08] hover:text-white hover:border-white/20'
+          }`}
         >
           All
         </Link>
@@ -78,73 +73,77 @@ export default async function TransactionsPage({
           <Link
             key={s}
             href={`/dashboard/transactions?status=${s}`}
-            className={buttonVariants({ variant: params.status === s ? "default" : "outline", size: "sm" })}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
+              params.status === s
+                ? 'bg-[#26C3EA] text-[#080D17] border-[#26C3EA] shadow-[0_0_15px_rgba(38,195,234,0.4)]'
+                : 'bg-white/[0.03] text-[#94A3B8] border-white/[0.08] hover:text-white hover:border-white/20'
+            }`}
           >
             {s}
           </Link>
         ))}
       </div>
 
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Ledger Entries</CardTitle>
-          <CardDescription>Comprehensive log of payments, applications, and routing</CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="font-semibold text-muted-foreground">Payment ID</TableHead>
-                <TableHead className="font-semibold text-muted-foreground">Application</TableHead>
-                <TableHead className="font-semibold text-muted-foreground">Merchant</TableHead>
-                <TableHead className="font-semibold text-muted-foreground">Provider</TableHead>
-                <TableHead className="font-semibold text-muted-foreground text-right">Amount</TableHead>
-                <TableHead className="font-semibold text-muted-foreground">Method</TableHead>
-                <TableHead className="font-semibold text-muted-foreground">Status</TableHead>
-                <TableHead className="font-semibold text-muted-foreground">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+      {/* Sleek Data Grid */}
+      <div className="bg-[#141E30] border border-white/[0.08] rounded-2xl p-4 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/[0.08]">
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Payment ID</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Application</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Merchant</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Provider</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8] text-right">Amount</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Method</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Status</th>
+                <th className="px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#94A3B8]">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
               {(payments ?? []).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-12">
-                    No transactions found
-                  </TableCell>
-                </TableRow>
+                <tr>
+                  <td colSpan={8} className="text-center text-[#94A3B8] py-16 text-sm font-semibold">
+                    No transactions match the selected criteria.
+                  </td>
+                </tr>
               ) : (
                 (payments ?? []).map((p: Record<string, unknown>) => (
-                  <TableRow key={p.payment_number as string} className="border-border hover:bg-muted/40 transition-colors">
-                    <TableCell className="font-mono text-primary font-medium text-xs">
+                  <tr
+                    key={p.payment_number as string}
+                    className="hover:bg-white/[0.025] transition-colors"
+                  >
+                    <td className="px-5 py-4 font-mono text-xs font-bold text-[#26C3EA]">
                       {p.payment_number as string}
-                    </TableCell>
-                    <TableCell className="text-foreground">
+                    </td>
+                    <td className="px-5 py-4 text-xs font-semibold text-white">
                       {(p.applications as { name: string } | null)?.name ?? '—'}
-                    </TableCell>
-                    <TableCell className="text-foreground">
+                    </td>
+                    <td className="px-5 py-4 text-xs font-semibold text-white/80">
                       {(p.merchants as { name: string } | null)?.name ?? '—'}
-                    </TableCell>
-                    <TableCell className="capitalize text-muted-foreground">
+                    </td>
+                    <td className="px-5 py-4 text-xs font-semibold text-[#94A3B8] capitalize">
                       {(p.merchant_providers as { provider: string } | null)?.provider ?? '—'}
-                    </TableCell>
-                    <TableCell className="text-right font-medium text-foreground">
+                    </td>
+                    <td className="px-5 py-4 text-sm font-bold text-white text-right">
                       ₹{(Number(p.amount) / 100).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="capitalize text-muted-foreground">
+                    </td>
+                    <td className="px-5 py-4 text-xs font-semibold text-[#94A3B8] capitalize">
                       {(p.payment_method as string) ?? '—'}
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="px-5 py-4">
                       <StatusBadge status={p.status as string} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-xs">
+                    </td>
+                    <td className="px-5 py-4 text-xs font-medium text-[#94A3B8]">
                       {new Date(p.created_at as string).toLocaleDateString('en-IN')}
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Pagination */}
       {(count ?? 0) > limit && (
@@ -152,7 +151,7 @@ export default async function TransactionsPage({
           {page > 1 && (
             <Link
               href={`/dashboard/transactions?page=${page - 1}${params.status ? `&status=${params.status}` : ''}`}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white transition-all"
             >
               Previous
             </Link>
@@ -160,7 +159,7 @@ export default async function TransactionsPage({
           {offset + limit < (count ?? 0) && (
             <Link
               href={`/dashboard/transactions?page=${page + 1}${params.status ? `&status=${params.status}` : ''}`}
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white transition-all"
             >
               Next
             </Link>

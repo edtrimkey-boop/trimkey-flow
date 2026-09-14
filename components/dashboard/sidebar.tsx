@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: '◈' },
@@ -15,7 +13,7 @@ const navItems = [
   { href: '/dashboard/api-keys', label: 'API Keys', icon: '⌘' },
   { href: '/dashboard/domains', label: 'Domains', icon: '◎' },
   { href: '/dashboard/webhooks', label: 'Webhooks', icon: '⟳' },
-  { href: '/dashboard/docs', label: 'Docs', icon: '📖' },
+  { href: '/dashboard/docs', label: 'Documentation', icon: '📖' },
   { href: '/dashboard/settings', label: 'Settings', icon: '⚙' },
 ]
 
@@ -30,22 +28,30 @@ export function Sidebar({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <aside className="w-60 bg-sidebar border-r border-sidebar-border flex flex-col h-full select-none">
-      {/* Brand */}
-      <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-bold text-xs shadow-sm">
-            TK
+    <aside className="w-[260px] bg-[#080D17] border-r border-white/[0.06] flex flex-col h-full select-none flex-shrink-0 z-30">
+      {/* Brand Header */}
+      <div className="p-5 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-[10px] overflow-hidden p-1 bg-[#141E30] border border-white/10 shadow-[0_0_15px_rgba(38,195,234,0.4)] flex-shrink-0">
+            <img
+              src="https://wjvoetdkkggyhtcoqqcj.supabase.co/storage/v1/object/public/Ed%20Trim%20Key/TRIM%20KEY%20FAVICON.png"
+              alt="Trim Key"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
-            <p className="text-foreground text-sm font-semibold tracking-tight">Trim Key Flow</p>
-            <p className="text-muted-foreground text-xs">V1 Orchestrator</p>
+            <h2 className="font-heading font-extrabold text-sm tracking-wider text-white">
+              TRIM KEY FLOW
+            </h2>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-[#26C3EA]">
+              Command Center
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      {/* Nav List */}
+      <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active = item.href === '/dashboard'
             ? pathname === '/dashboard'
@@ -55,33 +61,35 @@ export function Sidebar({ userEmail }: { userEmail: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`flex items-center gap-3.5 px-6 py-3.5 text-xs font-semibold tracking-wide transition-all border-l-4 ${
                 active
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-xs font-semibold'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50'
+                  ? 'text-[#26C3EA] border-[#26C3EA] bg-gradient-to-r from-[#26C3EA]/15 to-transparent [text-shadow:0_0_10px_rgba(38,195,234,0.4)] font-bold'
+                  : 'text-[#94A3B8] border-transparent hover:text-white hover:bg-white/[0.03] hover:border-white/20'
               }`}
             >
-              <span className="text-sm w-4 text-center leading-none">{item.icon}</span>
-              {item.label}
+              <span className="text-base w-4 text-center leading-none opacity-80">{item.icon}</span>
+              <span>{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
-      {/* User Section */}
-      <div className="p-3 border-t border-sidebar-border space-y-2">
-        <div className="px-3 py-1">
-          <p className="text-muted-foreground text-xs truncate font-mono">{userEmail || 'Admin User'}</p>
+      {/* Footer / Sign Out */}
+      <div className="p-4 border-t border-white/[0.06] space-y-2">
+        <div className="px-2 py-1">
+          <p className="text-[11px] font-mono text-[#94A3B8] truncate">{userEmail || 'admin@trimkey.in'}</p>
+          <span className="text-[9px] font-extrabold uppercase text-[#2ECC71] tracking-wider bg-[#2ECC71]/10 px-2 py-0.5 rounded mt-1 inline-block">
+            Authorized
+          </span>
         </div>
-        <Separator />
-        <Button
-          variant="ghost"
-          size="sm"
+
+        <button
           onClick={handleSignOut}
-          className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs font-normal"
+          className="w-full mt-2 py-2.5 px-3 rounded-lg text-xs font-bold text-[#EF4444] bg-[#EF4444]/10 hover:bg-gradient-to-r hover:from-[#EF4444] hover:to-[#B91C1C] hover:text-white border border-[#EF4444]/20 hover:border-transparent transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
         >
-          Sign out
-        </Button>
+          <span>⎋</span>
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   )
