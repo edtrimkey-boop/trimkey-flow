@@ -62,107 +62,46 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B111E] px-4 select-none relative overflow-hidden">
-      {/* Background Ambient Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#26C3EA]/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="w-full max-w-[430px] z-10">
-        {/* Header Branding */}
-        <div className="text-center mb-8">
-          <Logo className="w-16 h-16 mb-4" glow={true} />
-          <h1 className="font-heading font-extrabold text-2xl tracking-wider text-white uppercase">
-            Trim Key Flow
-          </h1>
-          <p className="text-xs font-semibold text-[#26C3EA] tracking-widest uppercase mt-1">
-            Payment Infrastructure Platform
-          </p>
-        </div>
-
-        {/* Login Box */}
-        <div className="bg-gradient-to-br from-[#141E30] to-[#0B111E] border border-white/[0.1] rounded-2xl p-8 sm:p-10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)]">
-          <div className="border-b border-white/[0.08] pb-4 mb-6">
-            <h2 className="font-heading font-extrabold text-base uppercase tracking-wider text-white">
-              Sign In to Command Center
-            </h2>
-            <p className="text-xs text-[#94A3B8] font-medium mt-1">
-              Authorized admin access only
-            </p>
-          </div>
-
-          {magicSent ? (
-            <div className="text-center py-6 space-y-3">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#2ECC71]/15 text-[#2ECC71] text-xl font-bold border border-[#2ECC71]/30">
-                ✓
-              </div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Magic Link Dispatched</h3>
-              <p className="text-xs text-[#94A3B8] font-medium">
-                Check your inbox for a direct sign-in link.
-              </p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="loginBox">
+         <div style={{ marginBottom: '30px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <div style={{ width: '60px', height: '60px' }}><Logo glow={true} /></div>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="admin@trimkey.in"
-                  className="w-full bg-[#1D2C46] border border-white/10 rounded-xl px-4 py-3 text-white text-xs font-semibold placeholder:text-[#94A3B8]/50 focus:outline-none focus:border-[#26C3EA] focus:ring-2 focus:ring-[#26C3EA]/20 transition-all"
-                />
-              </div>
+            <h2 className="brand" style={{ justifyContent: 'center', fontSize: '24px' }}>Trim Key Flow</h2>
+            <p style={{ color: 'var(--brand)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', marginTop: '5px' }}>
+               Command Center
+            </p>
+         </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1.5">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full bg-[#1D2C46] border border-white/10 rounded-xl px-4 py-3 text-white text-xs font-semibold placeholder:text-[#94A3B8]/50 focus:outline-none focus:border-[#26C3EA] focus:ring-2 focus:ring-[#26C3EA]/20 transition-all"
-                />
-              </div>
+         {magicSent ? (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+               <h3 style={{ color: 'var(--success)', marginBottom: '10px' }}>Magic Link Sent!</h3>
+               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Check your inbox to sign in.</p>
+            </div>
+         ) : (
+            <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
+               <label className="label-text" style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Email Address</label>
+               <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
+               
+               <label className="label-text" style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px', display: 'block', marginTop: '10px' }}>Password</label>
+               <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
 
-              {error && (
-                <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl p-3 text-[#EF4444] text-xs font-semibold">
-                  {error}
-                </div>
-              )}
+               {error && <div style={{ color: 'var(--danger)', fontSize: '12px', fontWeight: 700, marginBottom: '15px' }}>{error}</div>}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider text-[#000] bg-gradient-to-r from-[#26C3EA] to-[#1A9CBF] hover:shadow-[0_8px_25px_rgba(38,195,234,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 cursor-pointer"
-              >
-                {loading ? 'Authenticating…' : 'Sign In'}
-              </button>
+               <button type="submit" disabled={loading} style={{ width: '100%', marginTop: '10px' }}>
+                  {loading ? 'Authenticating...' : 'Sign In Securely'}
+               </button>
 
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10" />
-                </div>
-                <div className="relative flex justify-center text-[10px] uppercase font-bold text-[#94A3B8]">
-                  <span className="bg-[#141E30] px-3">or</span>
-                </div>
-              </div>
+               <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '10px', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>
+                  — OR —
+               </div>
 
-              <button
-                type="button"
-                onClick={handleMagicLink}
-                disabled={loading}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-[#26C3EA] bg-transparent hover:bg-[#26C3EA]/10 border border-[#26C3EA]/40 transition-all cursor-pointer"
-              >
-                Send Magic Link
-              </button>
+               <button type="button" onClick={handleMagicLink} disabled={loading} className="btn-outline" style={{ width: '100%' }}>
+                  Send Magic Link
+               </button>
             </form>
-          )}
-        </div>
+         )}
       </div>
     </div>
   )

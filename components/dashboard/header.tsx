@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/ui/logo'
 
 const pathTitles: Record<string, string> = {
-  '/dashboard': 'Overview',
+  '/dashboard': 'Dashboard',
   '/dashboard/transactions': 'Transactions Ledger',
   '/dashboard/payments': 'Payments',
   '/dashboard/merchants': 'Merchants & Providers',
@@ -19,44 +19,34 @@ const pathTitles: Record<string, string> = {
 export function Header({ userEmail }: { userEmail: string }) {
   const pathname = usePathname()
   const title = pathTitles[pathname] ?? 'Command Center'
-
   const userInitial = (userEmail ? userEmail.charAt(0) : 'T').toUpperCase()
 
   return (
-    <header className="h-[72px] sticky top-0 z-40 flex items-center justify-between px-8 bg-[#0B111E]/70 backdrop-blur-xl border-b border-white/[0.06]">
-      {/* Left: Glass Title Pill */}
-      <div className="glass-title-pill">
-        <Logo className="w-7 h-7" glow={false} />
-        <span className="font-heading font-extrabold text-xs tracking-wider uppercase text-white/90">
-          Trim Key Flow
-        </span>
-        <div className="w-[1px] h-4 bg-white/20" />
-        <span className="text-xs font-semibold text-[#26C3EA]">
-          {title}
-        </span>
-      </div>
-
-      {/* Right Actions */}
-      <div className="flex items-center gap-4">
-        {/* Live Status Indicator */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-xs font-medium">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2ECC71] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#2ECC71]"></span>
-          </span>
-          <span className="text-white/80">Flow Gateway v1.0</span>
-        </div>
-
-        {/* User Profile Pill */}
-        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-all cursor-default">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#26C3EA] to-[#8B5CF6] flex items-center justify-center font-bold text-xs text-white shadow-sm flex-shrink-0">
-            {userInitial}
+    <>
+      <div className="header-scrim"></div>
+      <div className="top-bar glass-surface">
+          <div className="brandRow">
+              <div className="glass-title-pill">
+                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'white', padding: '2px' }}>
+                     <Logo glow={false} />
+                  </div>
+                  <span className="brand" style={{ fontSize: '13px' }}>Trim Key Flow</span>
+                  <div className="title-separator"></div>
+                  <span className="brand" style={{ color: 'var(--brand)', fontWeight: 900, fontSize: '13px' }}>
+                     {title}
+                  </span>
+              </div>
           </div>
-          <span className="hidden md:inline-block text-xs font-medium text-white/80 max-w-[180px] truncate">
-            {userEmail || 'Admin'}
-          </span>
-        </div>
+          <div>
+             <div className="user-profile-container">
+                <div className="avatar-circle">{userInitial}</div>
+                <div style={{ textAlign: 'left', marginRight: '5px' }} className="hidden md:block">
+                    <p style={{ fontSize: '13px', fontWeight: 800, color: 'white', margin: 0 }}>Administrator</p>
+                    <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>System Admin</p>
+                </div>
+             </div>
+          </div>
       </div>
-    </header>
+    </>
   )
 }

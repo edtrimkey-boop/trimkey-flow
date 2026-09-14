@@ -1,0 +1,475 @@
+
+</head>
+<body>
+
+<!-- 🍏 iOS MOBILE NAVIGATION ENGINE (Injected via JS) -->
+<div id="mobile-nav-bar" style="display:none;"></div>
+<div id="fab-overlay" class="glass-overlay" style="z-index:4998;" onclick="toggleFabMenu()"></div>
+<div id="fab-action-sheet">
+    <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin: 0 auto 25px auto;"></div>
+    <div class="fab-grid" id="fab-grid-container">
+        <!-- Tools injected here -->
+    </div>
+</div>
+  
+<!-- TRUE LIQUID REFRACTION ENGINE -->
+<svg style="width:0; height:0; position:absolute;" aria-hidden="true" focusable="false">
+  <filter id="liquid-refraction" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+    
+    <!-- 1. The Mathematical Lens Map (Neutral gray center, distorted edges) -->
+    <feImage href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cdefs%3E%3CradialGradient id='rg' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='rgb(128,128,128)'/%3E%3Cstop offset='100%25' stop-color='rgb(200,200,200)'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='256' height='256' fill='url(%23rg)'/%3E%3C/svg%3E" result="LENS_MAP" preserveAspectRatio="none"/>
+    
+    <!-- 2. Physically bend the BACKGROUND pixels (SourceGraphic in a backdrop-filter targets the background) -->
+    <feDisplacementMap in="SourceGraphic" in2="LENS_MAP" scale="30" xChannelSelector="R" yChannelSelector="G" result="BENT_PIXELS"/>
+    
+    <!-- 3. Frosted Polish (Blur & Saturation applied strictly to the bent background) -->
+    <feGaussianBlur in="BENT_PIXELS" stdDeviation="8" result="FROSTED"/>
+    <feColorMatrix in="FROSTED" type="saturate" values="1.6" />
+    
+  </filter>
+</svg>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+<input type="file" id="profilePicInput" style="display:none;" accept="image/png, image/jpeg, image/jpg">
+
+<!-- =======================================================
+     SYSTEM MODALS (UNIFIED PREMIUM GLASS DESIGN)
+     ======================================================= -->
+
+<div id="cropperOverlay" class="glass-overlay">
+  <div class="glass-box" style="max-width: 500px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--brand);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Adjust Profile Picture
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('cropperOverlay')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Drag to position and scale to perfectly fit the 1:1 circle ratio.</p>
+    <div class="cropper-container"><img id="cropperImage"></div>
+    <div style="display: flex; gap: 12px;">
+        <button onclick="closeModal('cropperOverlay')" class="btn-outline" style="flex:1; border-color:var(--text-muted); color:var(--text-muted);">Cancel</button>
+        <button onclick="cropAndUpload()" class="btn-success" style="flex:1; background:linear-gradient(135deg, var(--brand), #1A9CBF); color:black;">Upload Photo</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 450px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--brand);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          Confirm Action
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('confirmModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    <p id="confirmText" style="margin-bottom:30px; line-height:1.6; color:var(--text); font-size:14px; font-weight: 600;"></p>
+    <div style="display:flex; gap:12px;">
+      <button onclick="closeModal('confirmModal')" class="btn-outline" style="flex:1; border-color:var(--text-muted); color:var(--text-muted);">Cancel</button>
+      <button id="btnConfirmYes" style="flex:1; background:linear-gradient(135deg, var(--danger), #B91C1C); color:white; border:none;">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="passwordModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 450px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--brand);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+          Change Password
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('passwordModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:25px; font-weight:600;">Update your security credentials.</p>
+    
+    <input type="password" id="oldPwInput" class="form-input" placeholder="Current Password" required>
+    <input type="password" id="newPwInput" class="form-input" placeholder="New Password" required>
+    <input type="password" id="confirmPwInput" class="form-input" placeholder="Confirm New Password" required>
+    
+    <button onclick="actionChangePassword(this)" style="width:100%; margin-top:15px; background:linear-gradient(135deg, var(--brand), #1A9CBF); color:black;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:text-bottom; margin-right:8px;"><path d="M20 9.807V6a1 1 0 00-1-1c-2 0-4.49-1.19-6.24-2.72a1.17 1.17 0 00-1.52 0C9.5 3.8 7 5 5 5a1 1 0 00-1 1v7c0 3.88 2.107 6.254 5 7.796"/><path d="M19 17v-2a2 2 0 00-4 0v2"/><rect x="13" y="17" width="8" height="5" rx="1"/></svg> Update Security
+    </button>
+  </div>
+</div>
+
+<div id="assignModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 500px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 style="color:white;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Live Dispatcher
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('assignModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    <p style="margin-bottom:20px; font-size:12px; color:var(--text-muted); font-weight:600;">Select an active operator to instantly assign this job.</p>
+    <div id="operatorListContainer" style="max-height: 350px; overflow-y: auto; text-align:left; margin-bottom: 20px;"></div>
+  </div>
+</div>
+
+<div id="payoutModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 450px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--success);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Settle Dues
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('payoutModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    <div style="text-align: center;">
+        <h2 id="payoutAmount" style="color:white; font-size: 36px; font-weight: 900; margin-bottom:5px;">₹0</h2>
+        <p id="payoutOpName" style="color:var(--brand); font-weight:800; margin-bottom:25px; font-size: 15px;"></p>
+        <div id="qrContainer" style="background:white; padding:15px; border-radius:16px; display:inline-block; margin-bottom:20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+           <img id="upiQrCode" src="" style="width:200px; height:200px; display:none;" />
+           <p id="noUpiMsg" style="color:black; font-weight:bold; font-size:14px; margin: 20px 0; display:none;">No UPI ID Found</p>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px; font-weight: 600;">Scan QR to pay via your banking app, then click Mark as Paid.</p>
+    </div>
+    <div style="display:flex; gap:12px;">
+      <button onclick="closeModal('payoutModal')" class="btn-outline" style="flex:1; border-color:var(--text-muted); color:var(--text-muted);">Cancel</button>
+      <button id="btnConfirmPayout" class="btn-success" style="flex:1;">Mark as Paid</button>
+    </div>
+  </div>
+</div>
+
+<div id="customAlert" class="glass-overlay">
+  <div class="glass-box" style="max-width: 450px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 id="customAlertTitle" style="color:var(--brand);">
+          System Notice
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('customAlert')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 10px;">
+        <div id="customAlertIcon" style="margin-bottom: 15px;"></div> 
+        <p id="customAlertMsg" style="margin-bottom:25px; line-height:1.6; color:var(--text); font-size:14px; font-weight: 600;"></p>
+    </div>
+    <button onclick="closeModal('customAlert')" style="width:100%;">Acknowledge</button>
+  </div>
+</div>
+
+<div id="paymentModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 450px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+     <div class="premium-sticky-header">
+        <h2 style="color:var(--brand);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Complete Payment
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('paymentModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+     </div>
+     
+     <div style="text-align: center;">
+         <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Ref: <span id="payRefId" style="color:white; font-weight:700;">Loading...</span></p>
+         <h2 id="payAmountDisplay" style="color:var(--success); font-size:36px; font-weight:900; margin-bottom:25px;">₹0</h2>
+         
+         <div style="background:white; padding:15px; border-radius:16px; display:inline-block; margin-bottom:20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <img id="payQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=UPI_PAYMENT" style="width:200px; height:200px; display:block;" />
+         </div>
+         
+         <p style="font-size:11px; color:var(--text-muted); margin-bottom:25px; font-weight:600; line-height:1.5;">Scan this QR with any UPI app to pay, or use the checkout link sent securely to your email.</p>
+     </div>
+     
+     <div style="display:flex; flex-direction:column; gap:12px;">
+       <button class="btn-success" onclick="verifyPayment()" style="width:100%; padding:14px; font-size:14px;">I Have Paid</button>
+       <button class="btn-outline" onclick="closeModal('paymentModal')" style="width:100%; border-color:var(--danger); color:var(--danger);">Cancel Process</button>
+     </div>
+  </div>
+</div>
+
+<!-- =======================================================
+     PAPER SUBMISSION MODAL
+     ======================================================= -->
+<div id="paperSubmitModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 800px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--brand);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Submit Question Paper
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span id="paperDraftUI" style="font-size:10px; color:var(--accent); font-weight:700; display:none;"></span>
+            <button type="button" id="paperFreshBtn" onclick="clearPaperForm()" style="font-size:10px; padding:4px 8px; border-radius:4px; border:1px solid var(--success); background:rgba(239,68,68,0.1); color:var(--success); display:none; cursor:pointer;">Start Fresh</button>
+            <button type="button" class="close-minimal" onclick="closeModal('paperSubmitModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    
+    <form id="nativePaperForm" onsubmit="handleNativePaperSubmit(event)">
+      <input type="hidden" id="formUserId" />
+      <input type="hidden" id="formInstCode" />
+      <input type="hidden" id="formTeacherName" />
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label class="label-text">Subject <span class="req">*</span></label>
+          <select id="formSubject" class="form-input" required onchange="savePaperDraft()"></select>
+        </div>
+        <div class="form-group">
+          <label class="label-text">Class <span class="req">*</span></label>
+          <select id="formClass" class="form-input" required onchange="savePaperDraft()" name="userClassPref">
+            <option value="" disabled selected>Select Class...</option>
+            <option value="Pre-Nursery">Pre-Nursery</option>
+            <option value="Nursery">Nursery</option>
+            <option value="LKG">LKG</option>
+            <option value="UKG">UKG</option>
+            <option value="Class 1">Class 1</option>
+            <option value="Class 2">Class 2</option>
+            <option value="Class 3">Class 3</option>
+            <option value="Class 4">Class 4</option>
+            <option value="Class 5">Class 5</option>
+            <option value="Class 6">Class 6</option>
+            <option value="Class 7">Class 7</option>
+            <option value="Class 8">Class 8</option>
+            <option value="Class 9">Class 9</option>
+            <option value="Class 10">Class 10</option>
+            <option value="Class 11">Class 11</option>
+            <option value="Class 12">Class 12</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label class="label-text">Test Number <span class="req">*</span></label>
+          <input type="text" id="formTestNumber" class="form-input" required placeholder="e.g. Test 01" oninput="savePaperDraft()" />
+        </div>
+        <div class="form-group">
+          <label class="label-text">Test Type <span class="req">*</span></label>
+          <select id="formTestType" class="form-input" required onchange="savePaperDraft()">
+            <option value="Objective (MCQ)">Objective (MCQ)</option><option value="1st Term Exam">1st Term Exam</option><option value="2nd Term Exam">2nd Term Exam</option>
+            <option value="3rd Term Exam">3rd Term Exam</option><option value="Annual Term Exam">Annual Term Exam</option><option value="Half Year Exam">Half Year Exam</option>
+            <option value="Annual Year Exam">Annual Year Exam</option><option value="Subjective">Subjective</option><option value="Combined (MCQ + Subj)">Combined (MCQ + Subj)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label class="label-text">Test Date <span class="req">*</span></label>
+          <input type="date" id="formTestDate" class="form-input" required oninput="savePaperDraft()" />
+        </div>
+        <div class="form-group">
+          <label class="label-text">Duration <span class="req">*</span></label>
+          <input type="text" id="formDuration" class="form-input" required placeholder="e.g. 1.5 Hours" oninput="savePaperDraft()" />
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label class="label-text">How many questions <span class="req">*</span></label>
+        <select id="formNumQuestionsSelect" class="form-input" required onchange="toggleOtherQuestionsField()">
+          <option value="" disabled selected>Select quantity...</option>
+          <option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="Other">Other:</option>
+        </select>
+        <input type="number" id="formNumQuestionsOther" class="form-input" placeholder="Enter custom number of questions" style="display:none; margin-top:8px;" />
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Full Marks <span class="req">*</span></label><input type="number" id="formFullMarks" class="form-input" required placeholder="e.g. 100" oninput="savePaperDraft()" /></div>
+        <div class="form-group"><label class="label-text">Pass Marks <span class="req">*</span></label><input type="number" id="formPassMarks" class="form-input" required placeholder="e.g. 33" oninput="savePaperDraft()" /></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 25px;">
+        <label class="label-text">Upload Question Paper <span class="req">*</span></label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">You can upload a single PDF or snap multiple photos.</p>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+           <button type="button" class="btn-outline" style="flex:1; cursor:pointer;" onclick="document.getElementById('formPdfInput').click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:text-bottom; margin-right:4px;"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg> Choose PDF</button>
+           <button type="button" class="btn-purple" style="flex:1; background:linear-gradient(135deg, var(--brand), #1A9CBF); border:none; color:#fff; cursor:pointer;" onclick="document.getElementById('formImageInput').click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg> Camera / Photos</button>
+        </div>
+
+        <input type="file" id="formPdfInput" accept="application/pdf" style="display:none;" onchange="handleUniversalSinglePDF(this, 'paper')" />
+        <input type="file" id="formImageInput" accept="image/*" multiple style="display:none;" onchange="handleUniversalMultipleImages(this, 'paper')" />
+        
+        <div id="uploadPreviewZone" style="display:flex; gap:10px; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; min-height:50px;">
+           <p style="color:var(--text-muted); font-size:12px; margin:auto; padding:10px;">No files selected.</p>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items: center; margin-top:20px;">
+        <button type="button" onclick="clearPaperForm()" style="background:transparent; border:1px solid #EF4444; color:#EF4444; padding:12px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;"><svg  width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/></svg>Clear Form</button>
+        <button type="submit" id="submitFormBtn" style="background:var(--brand); border:none; color:#0B111E; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 0 12px var(--brand-glow);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><path d="M11.35 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M14 19h6"/><path d="M17 16v6"/></svg>Submit Paper Securely</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- =======================================================
+     DOCUMENT SUBMISSION MODAL
+     ======================================================= -->
+<div id="docSubmitModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 800px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--accent);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>Submit Document Job</h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span id="docDraftUI" style="font-size:10px; color:var(--accent); font-weight:700; display:none;"></span>
+            <button type="button" id="docFreshBtn" onclick="clearDocForm()" style="font-size:10px; padding:4px 8px; border-radius:4px; border:1px solid var(--success); background:rgba(239,68,68,0.1); color:var(--success); display:none; cursor:pointer;">Start Fresh</button>
+            <button type="button" class="close-minimal" onclick="closeModal('docSubmitModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    
+   <form id="nativeDocForm" onsubmit="handleNativeDocSubmit(event)">
+      <input type="hidden" id="docUserId" />
+      <input type="hidden" id="docInstId" />
+      
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label class="label-text">Work Type <span class="req">*</span></label>
+          <select id="docType" class="form-input" required onchange="toggleDocDateReq(); saveDocDraft()">
+            <option value="" disabled selected>Select Doc Type...</option>
+            <option value="Report Card">Report Card</option>
+            <option value="Admit Card">Admit Card</option>
+            <option value="ID Card">ID Card</option>
+            <option value="Certificate">Certificate</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="label-text">Announcement Date <span class="req" id="docDateReqStar" style="display:none;">*</span></label>
+          <input type="date" id="docDate" class="form-input" onchange="saveDocDraft()" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label class="label-text">Class Name <span class="req">*</span></label>
+          <select id="docClass" class="form-input" required onchange="saveDocDraft()">
+            <option value="" disabled selected>Select Class...</option>
+            <option value="Pre-Nursery">Pre-Nursery</option>
+            <option value="Nursery">Nursery</option>
+            <option value="LKG">LKG</option>
+            <option value="UKG">UKG</option>
+            <option value="Class 1">Class 1</option>
+            <option value="Class 2">Class 2</option>
+            <option value="Class 3">Class 3</option>
+            <option value="Class 4">Class 4</option>
+            <option value="Class 5">Class 5</option>
+            <option value="Class 6">Class 6</option>
+            <option value="Class 7">Class 7</option>
+            <option value="Class 8">Class 8</option>
+            <option value="Class 9">Class 9</option>
+            <option value="Class 10">Class 10</option>
+            <option value="Class 11">Class 11</option>
+            <option value="Class 12">Class 12</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="label-text">Exam Name <span class="req">*</span></label>
+          <select id="docExamName" class="form-input" required onchange="saveDocDraft()">
+            <option value="" disabled selected>Select Exam...</option>
+            <option value="Objective (MCQ)">Objective (MCQ)</option>
+            <option value="1st Term Exam">1st Term Exam</option>
+            <option value="2nd Term Exam">2nd Term Exam</option>
+            <option value="3rd Term Exam">3rd Term Exam</option>
+            <option value="Annual Term Exam">Annual Term Exam</option>
+            <option value="Half Year Exam">Half Year Exam</option>
+            <option value="Annual Year Exam">Annual Year Exam</option>
+            <option value="Subjective">Subjective</option>
+            <option value="Combined (MCQ + Subj)">Combined (MCQs + Subj)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Session <span class="req">*</span></label><input type="text" id="docSession" class="form-input" readonly /></div>
+        <div class="form-group"><label class="label-text">Number of Students <span class="req">*</span></label><input type="number" id="docNumStudents" class="form-input" required placeholder="e.g. 45" oninput="saveDocDraft()" /></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 25px;">
+        <label class="label-text">Upload Student Data <span class="req">*</span></label>
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;">
+          For admit card: Upload schedule including subjects. <a href="#" style="color:var(--brand);">[Template]</a><br>
+          For Report Card: Upload data sheet of student marks with admission number. <a href="#" style="color:var(--brand);">[Template]</a>
+        </p>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+           <button type="button" class="btn-outline" style="flex:1; cursor:pointer;" onclick="document.getElementById('docPdfInput').click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:text-bottom; margin-right:4px;"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg> Choose PDF</button>
+           <button type="button" class="btn-purple" style="flex:1; background:linear-gradient(135deg, var(--brand), #1A9CBF); border:none; color:#fff; cursor:pointer;" onclick="document.getElementById('docImageInput').click()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg> Camera / Photos</button>
+        </div>
+
+        <input type="file" id="docPdfInput" accept="application/pdf" style="display:none;" onchange="handleUniversalSinglePDF(this, 'doc')" />
+        <input type="file" id="docImageInput" accept="image/*" multiple style="display:none;" onchange="handleUniversalMultipleImages(this, 'doc')" />
+        
+        <div id="docUploadPreviewZone" style="display:flex; gap:10px; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; min-height:50px;">
+           <p style="color:var(--text-muted); font-size:12px; margin:auto; padding:10px;">No files selected.</p>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items: center; margin-top:20px;">
+        <button type="button" onclick="clearDocForm()" style="background:transparent; border:1px solid #EF4444; color:#EF4444; padding:12px 20px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;"><svg  width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/></svg>Clear Form</button>
+        <button type="submit" id="submitDocBtn" style="background:var(--accent); border:none; color:#000; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:800; cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:text-bottom; margin-right:4px;"><path d="M11.35 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M14 19h6"/><path d="M17 16v6"/></svg>Submit Document Securely</button>
+      </div>
+    </form>
+  </div> 
+</div> 
+
+<div id="instRegModal" class="glass-overlay">
+  <div class="glass-box" style="max-width: 800px; padding: 40px; text-align: left; max-height: 90vh; overflow-y: auto; position: relative;">
+    <div class="premium-sticky-header">
+        <h2 style="color:var(--success);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:8px;"><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M18 4.933V21"/><path d="m4 6 7.106-3.79a2 2 0 0 1 1.788 0L20 6"/><path d="m6 11-3.52 2.147a1 1 0 0 0-.48.854V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a1 1 0 0 0-.48-.853L18 11"/><path d="M6 4.933V21"/><circle cx="12" cy="9" r="2"/></svg>
+          Register New Institute
+        </h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <button type="button" class="close-minimal" onclick="closeModal('instRegModal')" style="position:relative; top:0; right:0;">✖</button>
+        </div>
+    </div>
+    
+    <form id="nativeInstRegForm" onsubmit="handleInstRegSubmit(event)">
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Admin Name <span class="req">*</span></label><input type="text" id="regClientName" class="form-input" required placeholder="e.g. John Doe" /></div>
+        <div class="form-group"><label class="label-text">Admin Email <span class="req">*</span></label><input type="email" id="regAdminEmail" class="form-input" required placeholder="admin@institute.com" /></div>
+      </div>
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Admin Phone <span class="req">*</span></label><input type="text" id="regAdminPhone" class="form-input" required placeholder="e.g. 9876543210" /></div>
+        <div class="form-group"><label class="label-text">Institute Name <span class="req">*</span></label><input type="text" id="regInstName" class="form-input" required placeholder="e.g. Apex Academy" /></div>
+        <div class="form-group"><label class="label-text">Institute Code <span class="req">*</span></label><input type="text" id="regInstCode" class="form-input" required placeholder="e.g. APX01" style="text-transform: uppercase;" /></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 15px;"><label class="label-text">Address <span class="req">*</span></label><textarea id="regAddress" class="form-input" required placeholder="Full physical address..." rows="2" style="resize:vertical;"></textarea></div>
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Plan Type <span class="req">*</span></label><select id="regPlanType" class="form-input" required><option value="" disabled selected>Select Plan...</option><option value="Standard">Standard</option><option value="Half Yearly">Half Yearly</option><option value="Annual">Annual</option></select></div>
+        <div class="form-group"><label class="label-text">Payment Status <span class="req">*</span></label><select id="regPaymentStatus" class="form-input" required onchange="toggleRegPaymentAmount()"><option value="Trial">Trial / Pay Later</option><option value="Paid Online">Paid Online Upfront</option><option value="Paid Cash">Paid Cash Upfront</option></select></div>
+      </div>
+
+      <!-- 🔥 NEW: INVOICE CALCULATOR GRID -->
+      <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px dashed var(--brand); margin-bottom: 15px;">
+          <p style="font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:10px;">Initial Billing & Quota Valuation</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+              <div class="form-group" style="margin-bottom:0;"><label class="label-text" style="color:white;">Plan Value (₹) <span class="req">*</span></label><input type="number" id="regPlanValue" class="form-input" required placeholder="0" oninput="calcRegNet()" style="margin-bottom:0;" /></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="label-text" style="color:var(--success);">Discount (₹)</label><input type="number" id="regDiscount" class="form-input" placeholder="0" oninput="calcRegNet()" style="margin-bottom:0;" /></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="label-text" style="color:var(--brand);">Net Payable (₹)</label><input type="number" id="regNetPayable" class="form-input" disabled style="margin-bottom:0; font-weight:900; color:var(--brand); background:rgba(38,195,234,0.1); border-color:var(--brand);" placeholder="0" /></div>
+          </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Amount Received Now (₹)</label><input type="number" id="regAmountPaid" class="form-input" placeholder="0" disabled /></div>
+        <div class="form-group"><label class="label-text">SMS Total <span class="req">*</span></label><input type="number" id="regSmsTotal" class="form-input" required placeholder="e.g. 10000" /></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px;">
+        <div class="form-group"><label class="label-text">Papers Total <span class="req">*</span></label><input type="number" id="regPapersTotal" class="form-input" required placeholder="e.g. 50" /></div>
+        <div class="form-group"><label class="label-text">Questions Per Paper <span class="req">*</span></label><input type="number" id="regQuestionsPerPaper" class="form-input" required placeholder="e.g. 30" /></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border);">
+        <div class="form-group" style="margin-bottom:0;"><label class="label-text" style="color:var(--brand);">Attendance App</label><select id="regAttToggle" class="form-input" style="margin-bottom:0;"><option value="NO">NO</option><option value="YES">YES</option></select></div>
+        <div class="form-group" style="margin-bottom:0;"><label class="label-text" style="color:var(--brand);">Admission App</label><select id="regAdmToggle" class="form-input" style="margin-bottom:0;"><option value="NO">NO</option><option value="YES">YES</option></select></div>
+        <div class="form-group" style="margin-bottom:0; grid-column: span 2;"><label class="label-text" style="color:var(--brand);">Fee App</label><select id="regFeeToggle" class="form-input" style="margin-bottom:0;"><option value="NO">NO</option><option value="YES">YES</option></select></div>
+      </div>
+
+      <div class="form-group" s
+
