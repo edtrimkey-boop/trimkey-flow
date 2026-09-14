@@ -3,8 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { loginAction, magicLinkAction } from './actions'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -12,33 +11,55 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [magicSent, setMagicSent] = useState(false)
-  const router = useRouter()
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const formData = new FormData()
+    formData.append('email', email)
+    formData.append('password', password)
 
-    if (error) {
-      setError(error.message)
+    try {
+      const result = await loginAction(formData)
+      if (result?.error) {
+        setError(result.error)
+        setLoading(false)
+      }
+    } catch (err) {
+      // In Next.js, redirect() throws a NEXT_REDIRECT error which is caught by Next.js router
+      // If it's a redirect, let it bubble up
+      const message = err instanceof Error ? err.message : String(err)
+      if (message.includes('NEXT_REDIRECT')) {
+        return
+      }
+      setError(message || 'An unexpected error occurred during sign in.')
       setLoading(false)
-    } else {
-      router.push('/dashboard')
-      router.refresh()
     }
   }
 
   async function handleMagicLink() {
-    if (!email) { setError('Enter your email first'); return }
+    if (!email) {
+      setError('Enter your email first')
+      return
+    }
     setLoading(true)
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/dashboard` } })
-    setLoading(false)
-    if (error) setError(error.message)
-    else setMagicSent(true)
+    setError(null)
+
+    try {
+      const redirectTo = `${window.location.origin}/dashboard`
+      const result = await magicLinkAction(email, redirectTo)
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setMagicSent(true)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send magic link')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -64,7 +85,7 @@ export default function LoginPage() {
               <p className="text-gray-400 text-sm">Check your email for a sign-in link.</p>
             </div>
           ) : (
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-gray-300 text-sm mb-1">Email</label>
                 <input
