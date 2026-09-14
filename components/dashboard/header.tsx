@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import Image from 'next/image'
+import { Logo } from '@/components/ui/logo'
 
 const pathTitles: Record<string, string> = {
   '/dashboard': 'Overview',
@@ -26,13 +26,7 @@ export function Header({ userEmail }: { userEmail: string }) {
     <header className="h-[72px] sticky top-0 z-40 flex items-center justify-between px-8 bg-[#0B111E]/70 backdrop-blur-xl border-b border-white/[0.06]">
       {/* Left: Glass Title Pill */}
       <div className="glass-title-pill">
-        <div className="w-[32px] h-[32px] rounded-full bg-white p-0.5 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
-          <img
-            src="https://wjvoetdkkggyhtcoqqcj.supabase.co/storage/v1/object/public/Ed%20Trim%20Key/TRIM%20KEY%20FAVICON.png"
-            alt="Trim Key"
-            className="w-full h-full object-contain"
-          />
-        </div>
+        <Logo className="w-7 h-7" glow={false} />
         <span className="font-heading font-extrabold text-xs tracking-wider uppercase text-white/90">
           Trim Key Flow
         </span>

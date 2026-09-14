@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Logo } from '@/components/ui/logo'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: '◈' },
@@ -32,13 +33,7 @@ export function Sidebar({ userEmail }: { userEmail: string }) {
       {/* Brand Header */}
       <div className="p-5 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] overflow-hidden p-1 bg-[#141E30] border border-white/10 shadow-[0_0_15px_rgba(38,195,234,0.4)] flex-shrink-0">
-            <img
-              src="https://wjvoetdkkggyhtcoqqcj.supabase.co/storage/v1/object/public/Ed%20Trim%20Key/TRIM%20KEY%20FAVICON.png"
-              alt="Trim Key"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <Logo className="w-10 h-10" glow={true} />
           <div>
             <h2 className="font-heading font-extrabold text-sm tracking-wider text-white">
               TRIM KEY FLOW

@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import { loginAction, magicLinkAction } from './actions'
+import { Logo } from '@/components/ui/logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -68,13 +69,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[430px] z-10">
         {/* Header Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#141E30] border border-white/10 p-2 shadow-[0_0_25px_rgba(38,195,234,0.4)] mb-4">
-            <img
-              src="https://wjvoetdkkggyhtcoqqcj.supabase.co/storage/v1/object/public/Ed%20Trim%20Key/TRIM%20KEY%20FAVICON.png"
-              alt="Trim Key"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <Logo className="w-16 h-16 mb-4" glow={true} />
           <h1 className="font-heading font-extrabold text-2xl tracking-wider text-white uppercase">
             Trim Key Flow
           </h1>

@@ -18,9 +18,6 @@ const overpass = Overpass({
 export const metadata: Metadata = {
   title: 'Trim Key Flow — Command Center',
   description: 'Payment Infrastructure & Orchestration Platform',
-  icons: {
-    icon: 'https://wjvoetdkkggyhtcoqqcj.supabase.co/storage/v1/object/public/Ed%20Trim%20Key/TRIM%20KEY%20FAVICON.png',
-  },
 }
 
 export default function RootLayout({
