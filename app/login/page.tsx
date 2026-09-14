@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -11,13 +13,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [magicSent, setMagicSent] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
@@ -32,6 +34,7 @@ export default function LoginPage() {
   async function handleMagicLink() {
     if (!email) { setError('Enter your email first'); return }
     setLoading(true)
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/dashboard` } })
     setLoading(false)
     if (error) setError(error.message)
