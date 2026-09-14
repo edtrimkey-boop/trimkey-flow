@@ -13,10 +13,10 @@ export default async function DashboardLayout({
   if (!user) redirect('/login')
 
   return (
-    <div className="flex h-screen bg-gray-950">
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar userEmail={user.email ?? ''} />
       <main className="flex-1 overflow-y-auto">
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-8 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

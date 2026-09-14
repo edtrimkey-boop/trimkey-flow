@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: '◈' },
@@ -29,22 +30,22 @@ export function Sidebar({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <aside className="w-56 bg-gray-900 border-r border-gray-800 flex flex-col h-full">
+    <aside className="w-60 bg-sidebar border-r border-sidebar-border flex flex-col h-full select-none">
       {/* Brand */}
-      <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-indigo-500 rounded-md flex items-center justify-center">
-            <span className="text-white font-bold text-xs">TK</span>
+      <div className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-bold text-xs shadow-sm">
+            TK
           </div>
           <div>
-            <p className="text-white text-sm font-semibold">Trim Key Flow</p>
-            <p className="text-gray-500 text-xs">Dashboard</p>
+            <p className="text-foreground text-sm font-semibold tracking-tight">Trim Key Flow</p>
+            <p className="text-muted-foreground text-xs">V1 Orchestrator</p>
           </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active = item.href === '/dashboard'
             ? pathname === '/dashboard'
@@ -54,30 +55,33 @@ export function Sidebar({ userEmail }: { userEmail: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all ${
                 active
-                  ? 'bg-indigo-950 text-indigo-300'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50'
               }`}
             >
-              <span className="text-base w-4 text-center leading-none">{item.icon}</span>
+              <span className="text-sm w-4 text-center leading-none">{item.icon}</span>
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      {/* User */}
-      <div className="p-3 border-t border-gray-800">
-        <div className="px-3 py-2">
-          <p className="text-gray-400 text-xs truncate">{userEmail}</p>
+      {/* User Section */}
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        <div className="px-3 py-1">
+          <p className="text-muted-foreground text-xs truncate font-mono">{userEmail || 'Admin User'}</p>
         </div>
-        <button
+        <Separator />
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleSignOut}
-          className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors"
+          className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs font-normal"
         >
           Sign out
-        </button>
+        </Button>
       </div>
     </aside>
   )

@@ -4,6 +4,10 @@ export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import { loginAction, magicLinkAction } from './actions'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -28,8 +32,6 @@ export default function LoginPage() {
         setLoading(false)
       }
     } catch (err) {
-      // In Next.js, redirect() throws a NEXT_REDIRECT error which is caught by Next.js router
-      // If it's a redirect, let it bubble up
       const message = err instanceof Error ? err.message : String(err)
       if (message.includes('NEXT_REDIRECT')) {
         return
@@ -63,86 +65,94 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">TK</span>
+          <div className="inline-flex items-center gap-2 mb-3">
+            <div className="w-9 h-9 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-bold text-base shadow-sm">
+              TK
             </div>
-            <span className="text-white font-semibold text-xl">Trim Key Flow</span>
+            <span className="text-foreground font-semibold text-2xl tracking-tight">Trim Key Flow</span>
           </div>
-          <p className="text-gray-400 text-sm">Payment Infrastructure Platform</p>
+          <p className="text-muted-foreground text-sm">Payment Infrastructure & Orchestration</p>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8">
-          <h1 className="text-white font-semibold text-lg mb-6">Sign in to your account</h1>
-
-          {magicSent ? (
-            <div className="text-center py-4">
-              <div className="text-green-400 text-sm mb-2">✓ Magic link sent</div>
-              <p className="text-gray-400 text-sm">Check your email for a sign-in link.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-300 text-sm mb-1">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="you@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 text-sm mb-1">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              {error && (
-                <div className="bg-red-950 border border-red-800 rounded-lg px-3 py-2 text-red-400 text-sm">
-                  {error}
+        <Card className="border-border bg-card shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-xl">Sign in to your account</CardTitle>
+            <CardDescription>Enter your credentials to access the admin dashboard</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {magicSent ? (
+              <div className="text-center py-6 space-y-2">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary text-lg font-bold">
+                  ✓
                 </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-lg py-2 text-sm font-medium transition-colors"
-              >
-                {loading ? 'Signing in…' : 'Sign in'}
-              </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-700" />
-                </div>
-                <div className="relative flex justify-center text-xs text-gray-500">
-                  <span className="bg-gray-900 px-2">or</span>
-                </div>
+                <h3 className="text-base font-medium text-foreground">Magic link sent</h3>
+                <p className="text-muted-foreground text-sm">Check your email for a sign-in link.</p>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">Email</label>
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="admin@trimkey.in"
+                    className="bg-background"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">Password</label>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="bg-background"
+                  />
+                </div>
 
-              <button
-                type="button"
-                onClick={handleMagicLink}
-                disabled={loading}
-                className="w-full border border-gray-700 hover:border-gray-600 text-gray-300 rounded-lg py-2 text-sm transition-colors"
-              >
-                Send magic link
-              </button>
-            </form>
-          )}
-        </div>
+                {error && (
+                  <div className="bg-destructive/15 border border-destructive/30 rounded-md p-3 text-destructive text-sm font-medium">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? 'Signing in…' : 'Sign in'}
+                </Button>
+
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">or</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleMagicLink}
+                  disabled={loading}
+                  className="w-full"
+                >
+                  Send magic link
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
