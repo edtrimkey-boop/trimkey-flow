@@ -66,7 +66,7 @@ export async function createFlowOrder(input: CreateFlowOrderInput): Promise<Orde
     customer_email: input.customerEmail ?? null,
     customer_phone: input.customerPhone ?? null,
     idempotency_key: input.idempotencyKey ?? null,
-    metadata: input.metadata ?? null,
+    metadata: input.metadata ?? {},
     expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min
   }
 

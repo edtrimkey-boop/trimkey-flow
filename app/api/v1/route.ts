@@ -84,6 +84,26 @@ export async function POST(request: NextRequest) {
     // 2. API key authentication
     const ctx = await authenticateApiKey(request.headers)
 
+    // 2.5 Domain Authorization (CORS Enforcement)
+    // If a request comes from a browser, ensure the domain is registered to the merchant's application
+    if (origin) {
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const db = createAdminClient()
+      const { data: domainRec } = await db
+        .from('application_domains')
+        .select('*')
+        .eq('application_id', ctx.application_id)
+        .eq('domain', origin)
+        .single()
+        
+      if (!domainRec) {
+        // Since we are mocking localhost testing for now, we will allow localhost
+        if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+          return errorResponse(ErrorCode.FORBIDDEN, `Domain ${origin} is not authorized for this API key`, requestId, 403)
+        }
+      }
+    }
+
     // 3. Rate limiting
     const { allowed, remaining } = checkRateLimit(ctx.api_key_id)
     if (!allowed) {

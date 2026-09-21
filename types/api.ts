@@ -173,6 +173,7 @@ export interface ApiKeyContext {
 // ── Checkout Response (returned from payment.create) ──────────
 
 export interface CheckoutInfo {
+  checkout_url: string
   payment_id: string
   payment_number: string
   order_id: string

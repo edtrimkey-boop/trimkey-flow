@@ -2,21 +2,26 @@ import type { Metadata } from "next";
 import { Montserrat, Overpass } from "next/font/google";
 import "./globals.css";
 
-// Configure core brand fonts
-const montserrat = Montserrat({ 
-  subsets: ["latin"], 
-  variable: "--font-montserrat" 
+
+// 1. Initialize custom fonts mapping to our CSS variables
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const overpass = Overpass({ 
-  subsets: ["latin"], 
-  variable: "--font-overpass" 
+const overpass = Overpass({
+  subsets: ["latin"],
+  variable: "--font-overpass",
+  weight: ["600", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Trim Key Flow | Gateway Operations",
-  description: "Advanced multi-gateway payment routing and management.",
+  title: "Trim Key Flow | Enterprise Routing",
+  description: "Advanced multi-gateway payment routing and management infrastructure.",
 };
+
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 export default function RootLayout({
   children,
@@ -24,14 +29,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    // 2. Force 'dark' mode at the HTML level
+    <html lang="en" className="dark suppressHydrationWarning">
       <body
-        className={`${montserrat.variable} ${overpass.variable} font-overpass bg-background text-foreground antialiased min-h-screen selection:bg-primary/30`}
+        className={`${montserrat.variable} ${overpass.variable} font-sans bg-background text-foreground antialiased min-h-screen selection:bg-primary/30`}
       >
-        {/* Global blurred background element for depth */}
-        <div className="fixed inset-0 -z-10 bg-dark-mesh bg-cover bg-center bg-no-repeat" />
+        <ToastProvider>
+        {/* 3. The universal fixed blurred mesh background */}
+        <div 
+          className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 50% 0%, #1a1a24 0%, #0a0a0c 100%)',
+            backgroundAttachment: 'fixed'
+          }}
+        />
+        {/* 4. Render main application views */}
         {children}
+        </ToastProvider>
       </body>
     </html>
   );
 }
+

@@ -16,8 +16,7 @@ const ALLOWED_ORIGINS = [
 ]
 
 export function getCorsHeaders(origin: string | null): Record<string, string> {
-  const allowed =
-    origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+  const allowed = origin || '*'
 
   return {
     'Access-Control-Allow-Origin': allowed,

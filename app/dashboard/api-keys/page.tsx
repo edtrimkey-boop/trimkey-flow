@@ -1,78 +1,187 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+'use client'
 
-export default async function ApiKeysPage() {
-  const db = createAdminClient()
-  const { data: keys } = await db
-    .from('api_keys')
-    .select('id, name, key_prefix, environment, status, permissions, last_used_at, expires_at, revoked_at, created_at, applications(name)')
-    .order('created_at', { ascending: false })
+import React, { useState, useEffect } from 'react'
+import { generateNewKeyAction, getExistingKeysAction } from './actions'
+import { DomainManager } from './DomainManager'
+
+export default function ApiKeysPage() {
+  const [keys, setKeys] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [revealStates, setRevealStates] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    loadKeys()
+  }, [])
+
+  async function loadKeys() {
+    setLoading(true)
+    try {
+      const data = await getExistingKeysAction()
+      setKeys(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleGenerate() {
+    setIsGenerating(true)
+    try {
+      const newKey = await generateNewKeyAction()
+      // Add the new key to the top of the list, injecting the full_secret 
+      // so it can be seen once by the user.
+      setKeys((prev) => [{
+        ...newKey,
+        key_prefix: newKey.full_secret, // display full secret temporarily
+        isNew: true
+      }, ...prev])
+      
+      // Auto-reveal newly generated keys
+      setRevealStates(prev => ({ ...prev, [newKey.id]: true }))
+    } catch (err) {
+      console.error(err)
+      alert('Failed to generate key')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const toggleReveal = (id: string) => {
+    setRevealStates(prev => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    alert('Copied to clipboard!')
+  }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">API Keys</h1>
-        <p className="text-gray-400 text-sm mt-1">
-          Manage API keys for client applications. Secrets are shown only once at creation.
-        </p>
+    <div className="space-y-6">
+      {/* Warning Banner */}
+      <div style={{ background: 'linear-gradient(135deg, var(--danger), #B91C1C)', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 10px 25px rgba(239,68,68,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div>
+          <div style={{ fontWeight: 900, fontSize: '14px', color: 'white', marginBottom: '4px' }}>
+            <span style={{ marginRight: '8px' }}>⚠️</span> 
+            SECURITY NOTICE
+          </div>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>
+            Your API secret keys can be used to process live payments. Do not share them or commit them to GitHub.
+          </div>
+        </div>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-800">
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Name</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Application</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Key</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Environment</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Last Used</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Created</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800">
-            {(keys ?? []).length === 0 ? (
-              <tr><td colSpan={7} className="text-center text-gray-500 py-12">No API keys yet. Create one via the API or CLI.</td></tr>
-            ) : (
-              (keys ?? []).map((k: Record<string, unknown>) => (
-                <tr key={k.id as string} className="hover:bg-gray-800/30 transition-colors">
-                  <td className="px-4 py-3 text-white">{k.name as string}</td>
-                  <td className="px-4 py-3 text-gray-300">{(k.applications as { name: string } | null)?.name ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className="font-mono text-indigo-400 text-xs">
-                      {k.key_prefix as string}••••••••
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded ${k.environment === 'live' ? 'text-green-400 bg-green-950' : 'text-yellow-400 bg-yellow-950'}`}>
-                      {k.environment as string}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded ${k.status === 'active' ? 'text-green-400 bg-green-950' : 'text-red-400 bg-red-950'}`}>
-                      {k.status as string}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {k.last_used_at ? new Date(k.last_used_at as string).toLocaleDateString('en-IN') : 'Never'}
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {new Date(k.created_at as string).toLocaleDateString('en-IN')}
+      <div className="panel">
+        <div className="panel-header">
+          <div>
+             <h3>Active API Keys</h3>
+             <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>
+                Manage authentication keys for your server integrations.
+             </p>
+          </div>
+          <button 
+            onClick={handleGenerate} 
+            disabled={isGenerating}
+            className="liquid-glass" 
+            style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 800, opacity: isGenerating ? 0.5 : 1 }}
+          >
+            <span style={{ fontSize: '14px', marginRight: '6px', verticalAlign: 'middle' }}>+</span>
+            {isGenerating ? 'Generating...' : 'Generate New Key'}
+          </button>
+        </div>
+
+        <div className="tk-table-wrapper" style={{ marginTop: '20px' }}>
+          <table className="tk-sleek-table">
+            <thead>
+              <tr>
+                <th>Environment</th>
+                <th>Secret Key</th>
+                <th>Created</th>
+                <th>Last Used</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                    Loading keys...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : keys.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                    No keys found. Generate one to get started.
+                  </td>
+                </tr>
+              ) : (
+                keys.map((k) => {
+                  const isRevealed = revealStates[k.id] || false;
+                  return (
+                    <tr key={k.id} style={k.isNew ? { background: 'rgba(38,195,234,0.1)' } : {}}>
+                      <td>
+                        <span className={`badge ${k.environment === 'live' ? 'bg-success' : 'bg-warning'}`}>
+                          {k.environment.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <code style={{ 
+                            background: 'rgba(0,0,0,0.3)', 
+                            padding: '6px 12px', 
+                            borderRadius: '6px', 
+                            border: '1px solid rgba(255,255,255,0.1)', 
+                            fontFamily: 'monospace', 
+                            fontSize: '12px', 
+                            filter: !isRevealed ? 'blur(4px)' : 'none', 
+                            color: k.isNew ? 'var(--success)' : 'var(--brand)', 
+                            transition: 'all 0.3s' 
+                          }}>
+                            {k.key_prefix}{!k.isNew && '********************************'}
+                          </code>
+                          <button onClick={() => toggleReveal(k.id)} className="btn-outline" style={{ padding: '4px 8px', fontSize: '10px' }}>
+                            {isRevealed ? 'Hide' : 'Reveal'}
+                          </button>
+                          {isRevealed && k.isNew && (
+                            <button onClick={() => copyToClipboard(k.key_prefix)} className="btn-outline" style={{ padding: '4px 8px', fontSize: '10px', color: 'var(--success)', borderColor: 'var(--success)' }}>
+                              Copy
+                            </button>
+                          )}
+                        </div>
+                        {k.isNew && (
+                          <div style={{ fontSize: '10px', color: 'var(--warning)', marginTop: '4px' }}>
+                            Copy this key now. You won't be able to see it again!
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                        {new Date(k.created_at).toLocaleDateString()}
+                      </td>
+                      <td style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                        {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Never'}
+                      </td>
+                      <td>
+                        <span className={`badge ${(k.status || 'active') === 'active' ? 'bg-info' : 'bg-danger'}`}>
+                          {(k.status || 'active').toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                         <button style={{ background: 'transparent', color: 'var(--danger)', border: '1px solid var(--danger)', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
+                           Revoke
+                         </button>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      <div className="mt-4 bg-indigo-950 border border-indigo-900 rounded-xl p-4 text-sm">
-        <p className="text-indigo-300 font-medium mb-1">Create an API key via the API</p>
-        <pre className="text-indigo-200 text-xs overflow-x-auto">{`curl -X POST https://flow.trimkey.in/api/v1 \\
-  -H "Authorization: Bearer tk_live_xxxxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{"action":"api_key.create","data":{"name":"Ed-Trim Key Production","environment":"live"}}'`}</pre>
-        <p className="text-indigo-400 text-xs mt-2">The full secret is returned once and cannot be retrieved again.</p>
-      </div>
+      
+      <DomainManager />
     </div>
   )
 }
