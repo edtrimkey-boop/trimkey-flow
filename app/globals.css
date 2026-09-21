@@ -2172,5 +2172,6 @@ h1, h2, h3, .premium-sticky-header h2, .panel h2, .glass-title-pill h3 {
 @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
 
 .glass-overlay .glass-box { max-height: 90vh; overflow-y: auto; }
-.premium-sticky-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(20px); background: rgba(0,0,0,0.5); }
+
+
 

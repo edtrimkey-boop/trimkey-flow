@@ -40,13 +40,10 @@ export default function DashboardLayout({
   useEffect(() => {
     setMobileSidebarOpen(false);
     if (previousPathname.current !== pathname) {
-      setIsNavigating(true);
       const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3');
       audio.volume = 0.2;
       audio.play().catch(e => console.log(e));
-      const t = setTimeout(() => setIsNavigating(false), 800);
       previousPathname.current = pathname;
-      return () => clearTimeout(t);
     }
   }, [pathname]);
 
@@ -265,6 +262,7 @@ export default function DashboardLayout({
     </div>
   );
 }
+
 
 
 

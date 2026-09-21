@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react'
 import { generateNewKeyAction, getExistingKeysAction } from './actions'
 import { DomainManager } from './DomainManager'
+import { useToast } from '@/components/ui/ToastProvider'
 
 export default function ApiKeysPage() {
+  const { showToast } = useToast()
   const [keys, setKeys] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -42,7 +44,7 @@ export default function ApiKeysPage() {
       setRevealStates(prev => ({ ...prev, [newKey.id]: true }))
     } catch (err) {
       console.error(err)
-      alert('Failed to generate key')
+      showToast('Failed to generate key', 'error')
     } finally {
       setIsGenerating(false)
     }
@@ -54,7 +56,7 @@ export default function ApiKeysPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    alert('Copied to clipboard!')
+    showToast('Copied to clipboard!', 'success')
   }
 
   return (

@@ -2,8 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { addDomainAction, getDomainsAction, deleteDomainAction } from './domain-actions'
+import { useToast } from '@/components/ui/ToastProvider'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 export function DomainManager() {
+  const { showToast } = useToast()
+  const { confirm } = useConfirm()
   const [domains, setDomains] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [newDomain, setNewDomain] = useState('')
@@ -40,21 +44,23 @@ export function DomainManager() {
       await addDomainAction(formattedDomain)
       setNewDomain('')
       await loadDomains()
+      showToast('Domain authorized successfully!', 'success')
     } catch (err: any) {
-      alert(err.message)
+      showToast(err.message || 'An error occurred', 'error')
     } finally {
       setAdding(false)
     }
   }
 
   async function handleRemove(domainStr: string) {
-    if (!confirm(`Are you sure you want to remove ${domainStr}? API keys will no longer work on this domain.`)) return
-    
+    const ok = await confirm(`Are you sure you want to remove ${domainStr}? API keys will no longer work on this domain.`)
+    if (!ok) return
     try {
       await deleteDomainAction(domainStr)
       await loadDomains()
+      showToast('Domain removed', 'success')
     } catch (err: any) {
-      alert(err.message)
+      showToast(err.message || 'An error occurred', 'error')
     }
   }
 
@@ -116,3 +122,5 @@ export function DomainManager() {
     </div>
   )
 }
+
+

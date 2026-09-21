@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ConfirmProvider } from '@/components/ui/ConfirmProvider';
 import { Montserrat, Overpass } from "next/font/google";
 import "./globals.css";
 
@@ -34,7 +35,7 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${overpass.variable} font-sans bg-background text-foreground antialiased min-h-screen selection:bg-primary/30`}
       >
-        <ToastProvider>
+        <ConfirmProvider><ToastProvider>
         {/* 3. The universal fixed blurred mesh background */}
         <div 
           className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
@@ -45,9 +46,11 @@ export default function RootLayout({
         />
         {/* 4. Render main application views */}
         {children}
-        </ToastProvider>
+        </ToastProvider></ConfirmProvider>
       </body>
     </html>
   );
 }
+
+
 
