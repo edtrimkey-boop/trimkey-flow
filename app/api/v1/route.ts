@@ -1,5 +1,5 @@
-// ============================================================
-// Trim Key Flow — Public API v1 Endpoint
+﻿// ============================================================
+// Trim Key Flow â€” Public API v1 Endpoint
 // POST /api/v1
 //
 // Single action-based endpoint. All application requests go here.
@@ -21,7 +21,7 @@ import { handleError, errorResponse, successResponse, ErrorCode, FlowError } fro
 import { validate } from '@/lib/validation'
 import type { FlowRequest, FlowAction } from '@/types/api'
 
-// ── Services ──────────────────────────────────────────────────
+// â”€â”€ Services â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 import { createPayment, getPayment, listPayments } from '@/services/payment'
 import { getOrder, listOrders } from '@/services/order'
 import { createRefund, getRefund } from '@/services/refund'
@@ -31,7 +31,7 @@ import { getApplication, listApplications } from '@/services/application'
 import { createApiKey, listApiKeys, revokeApiKey } from '@/services/api-key'
 import { addDomain, removeDomain } from '@/services/domain'
 
-// ── Validation Schemas ────────────────────────────────────────
+// â”€â”€ Validation Schemas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 import {
   CreatePaymentSchema,
   GetPaymentSchema,
@@ -52,15 +52,15 @@ import {
   DeleteDomainSchema,
 } from '@/lib/validation'
 
-// ── CORS Preflight ────────────────────────────────────────────
+// â”€â”€ CORS Preflight â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export async function OPTIONS(request: NextRequest) {
   return handleCors(request) ?? new Response(null, { status: 204 })
 }
 
-// ── Main Handler ──────────────────────────────────────────────
+// â”€â”€ Main Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export async function POST(request: NextRequest) {
+async function _POST(request: NextRequest) {
   const requestId = resolveRequestId(request.headers)
   const origin = request.headers.get('origin')
   const corsHeaders = getCorsHeaders(origin)
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ── Action Dispatcher ─────────────────────────────────────────
+// â”€â”€ Action Dispatcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function dispatch(
   action: FlowAction,
@@ -144,7 +144,7 @@ async function dispatch(
   request: NextRequest,
 ): Promise<unknown> {
   switch (action) {
-    // ── Payments ──────────────────────────────────────────────
+    // â”€â”€ Payments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'payment.create': {
       const validated = validate(CreatePaymentSchema, data)
       return createPayment(validated, ctx, request.headers)
@@ -158,7 +158,7 @@ async function dispatch(
       return listPayments(validated as Parameters<typeof listPayments>[0], ctx)
     }
 
-    // ── Orders ────────────────────────────────────────────────
+    // â”€â”€ Orders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'order.get': {
       const validated = validate(GetOrderSchema, data)
       return getOrder(validated.order_id, ctx)
@@ -168,7 +168,7 @@ async function dispatch(
       return listOrders(ctx, validated as Parameters<typeof listOrders>[1])
     }
 
-    // ── Refunds ───────────────────────────────────────────────
+    // â”€â”€ Refunds â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'refund.create': {
       const validated = validate(CreateRefundSchema, data)
       return createRefund(validated, ctx)
@@ -178,7 +178,7 @@ async function dispatch(
       return getRefund(validated, ctx)
     }
 
-    // ── Transactions ──────────────────────────────────────────
+    // â”€â”€ Transactions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'transaction.get': {
       const validated = validate(GetTransactionSchema, data)
       return getTransaction(validated.transaction_id, ctx)
@@ -188,7 +188,7 @@ async function dispatch(
       return listTransactions(ctx, validated as Parameters<typeof listTransactions>[1])
     }
 
-    // ── Merchants ─────────────────────────────────────────────
+    // â”€â”€ Merchants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'merchant.get': {
       const validated = validate(GetMerchantSchema, data)
       return getMerchant(validated.merchant_id, ctx)
@@ -198,7 +198,7 @@ async function dispatch(
       return listMerchants(ctx, validated.limit, validated.offset)
     }
 
-    // ── Applications ──────────────────────────────────────────
+    // â”€â”€ Applications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'application.get': {
       const validated = validate(GetApplicationSchema, data)
       return getApplication(validated.application_id, ctx)
@@ -208,7 +208,7 @@ async function dispatch(
       return listApplications(ctx, validated.limit, validated.offset)
     }
 
-    // ── API Keys ──────────────────────────────────────────────
+    // â”€â”€ API Keys â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'api_key.create': {
       const validated = validate(CreateApiKeySchema, data)
       return createApiKey(validated, ctx)
@@ -218,7 +218,7 @@ async function dispatch(
       return revokeApiKey(validated, ctx)
     }
 
-    // ── Domains ───────────────────────────────────────────────
+    // â”€â”€ Domains â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     case 'domain.create': {
       const validated = validate(CreateDomainSchema, data)
       return addDomain(validated.domain, ctx)
@@ -231,4 +231,15 @@ async function dispatch(
     default:
       throw new FlowError(ErrorCode.INVALID_ACTION, `Unknown action: ${action}`, 400)
   }
+}
+
+
+export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+  const response = await _POST(request);
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  return response;
 }

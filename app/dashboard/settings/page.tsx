@@ -1,82 +1,122 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'general';
+  
+  const { showToast } = useToast();
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isTestMode, setIsTestMode] = useState(false);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out pb-20">
-      <div className="glass-panel p-8">
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
-          <h3 className="text-[16px] uppercase text-brand tracking-[1.5px] m-0 font-extrabold">Master Configuration</h3>
-          <button className="bg-gradient-to-br from-brand to-[#059669] text-black border-none px-6 py-3 rounded-xl font-extrabold text-[13px] tracking-wide shadow-[0_4px_15px_rgba(16,185,129,0.25)] hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] transition-all">
-            Save Changes
-          </button>
+    <div className="panel">
+      <div className="panel-header">
+        <div>
+           <h3>Configuration & Profile</h3>
+           <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>
+              Manage your organization settings, profiles, and API preferences.
+           </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Section 1: Gateway Toggles */}
-          <div className="bg-black/20 rounded-xl border border-white/10 p-6">
-            <h4 className="text-brand mt-0 mb-4 font-extrabold flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Active Gateways
-            </h4>
-            
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <div className="text-white text-[13px] font-extrabold">Razorpay Adapter</div>
-                <div className="text-text-muted text-[11px]">Primary INR routing via UPI/Cards.</div>
-              </div>
-              <label className="switch m-0">
-                <input type="checkbox" defaultChecked />
-                <span className="slider"></span>
-              </label>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="text-white text-[13px] font-extrabold">Stripe Adapter</div>
-                <div className="text-text-muted text-[11px]">International USD routing.</div>
-              </div>
-              <label className="switch m-0">
-                <input type="checkbox" />
-                <span className="slider"></span>
-              </label>
-            </div>
-          </div>
-
-          {/* Section 2: Environment Settings */}
-          <div className="bg-black/20 rounded-xl border border-white/10 p-6">
-            <h4 className="text-accent mt-0 mb-4 font-extrabold flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              Environment State
-            </h4>
-            
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <div className="text-white text-[13px] font-extrabold">Force Test Mode</div>
-                <div className="text-text-muted text-[11px]">Routes all requests to provider sandboxes.</div>
-              </div>
-              <label className="switch m-0">
-                <input 
-                  type="checkbox" 
-                  checked={isTestMode}
-                  onChange={(e) => setIsTestMode(e.target.checked)} 
-                />
-                <span className="slider"></span>
-              </label>
-            </div>
-            
-            {isTestMode && (
-              <div className="text-warning text-[11px] font-bold bg-warning/10 p-3 rounded-lg border border-warning/20">
-                Warning: Test mode is currently overriding live API calls.
-              </div>
-            )}
-          </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+           <button onClick={() => showToast('Configuration Saved Successfully', 'success')} className="liquid-glass" style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 800 }}>
+             Save Changes
+           </button>
         </div>
       </div>
+
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '25px' }}>
+        {['general', 'profile', 'billing'].map((t) => (
+          <button
+            key={t}
+            onClick={() => setActiveTab(t)}
+            className={activeTab === t ? "flat-pill bg-info" : "flat-pill"}
+            style={activeTab === t ? {} : { background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)', border: '1px solid rgba(255,255,255,0.1)' }}
+          >
+            <span style={{ textTransform: 'capitalize' }}>{t}</span>
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'profile' && (
+        <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
+          <h4 style={{ color: 'white', marginTop: 0, marginBottom: '20px' }}>User Profile</h4>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '6px' }}>FULL NAME</label>
+              <input type="text" className="tk-input" defaultValue="Admin User" />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '6px' }}>EMAIL ADDRESS</label>
+              <input type="email" className="tk-input" defaultValue="admin@trimkey.in" />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '6px' }}>ORGANIZATION</label>
+              <input type="text" className="tk-input" defaultValue="Trim Key Corp" disabled style={{ opacity: 0.5 }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'general' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          
+          <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
+            <h4 style={{ color: 'var(--brand)', marginTop: 0, marginBottom: '15px' }}>Active Gateways</h4>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              <div>
+                <div style={{ color: 'white', fontSize: '13px', fontWeight: 800 }}>Razorpay Adapter</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Primary INR routing via UPI/Cards.</div>
+              </div>
+              <label className="toggle-switch">
+                <input type="checkbox" defaultChecked />
+                <span className="slider round"></span>
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ color: 'white', fontSize: '13px', fontWeight: 800 }}>Stripe Global</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>International cards & USD.</div>
+              </div>
+              <label className="toggle-switch">
+                <input type="checkbox" defaultChecked />
+                <span className="slider round"></span>
+              </label>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
+            <h4 style={{ color: 'var(--warning)', marginTop: 0, marginBottom: '15px' }}>Developer Mode</h4>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ color: 'white', fontSize: '13px', fontWeight: 800 }}>Simulate Transactions</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Route all payments to mock adapter.</div>
+              </div>
+              <label className="toggle-switch">
+                <input type="checkbox" checked={isTestMode} onChange={(e) => setIsTestMode(e.target.checked)} />
+                <span className="slider round"></span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {activeTab === 'billing' && (
+        <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+           <h3 style={{ color: 'white' }}>Pro Plan Active</h3>
+           <p style={{ color: 'var(--text-muted)' }}>You are currently on the Enterprise Trim Key plan.</p>
+        </div>
+      )}
+
     </div>
   );
 }
+

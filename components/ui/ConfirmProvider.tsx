@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { playSound } from '@/lib/audioEngine'
 
 interface ConfirmContextType {
   confirm: (message: string) => Promise<boolean>
@@ -14,6 +15,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [resolvePromise, setResolvePromise] = useState<(value: boolean) => void>()
 
   const confirm = useCallback((msg: string) => {
+    playSound('warning')
+    
     setMessage(msg)
     setIsOpen(true)
     return new Promise<boolean>((resolve) => {
@@ -65,3 +68,4 @@ export function useConfirm() {
   if (!context) throw new Error('useConfirm must be used within ConfirmProvider')
   return context
 }
+

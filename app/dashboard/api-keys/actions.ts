@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -51,3 +51,18 @@ export async function getExistingKeysAction() {
   return data || []
 }
 
+
+export async function revokeKeyAction(keyId: string) {
+  const db = createAdminClient()
+  const { error } = await db
+    .from('api_keys')
+    .update({ status: 'revoked' })
+    .eq('id', keyId)
+
+  if (error) {
+    console.error('Supabase Error:', error)
+    throw new Error('Failed to revoke API key')
+  }
+
+  return { success: true }
+}

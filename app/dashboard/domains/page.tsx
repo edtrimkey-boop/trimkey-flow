@@ -1,4 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { AddDomainButton } from './AddDomain'
 
 export default async function DomainsPage() {
   const db = createAdminClient()
@@ -8,43 +9,46 @@ export default async function DomainsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Domains</h1>
-        <p className="text-gray-400 text-sm mt-1">Allowed origins for client applications</p>
+    <div className="panel">
+      <div className="panel-header">
+        <div>
+           <h3>Domains</h3>
+           <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>
+              Allowed origins for client applications
+           </p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+           <AddDomainButton />
+        </div>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="tk-table-wrapper">
+        <table className="tk-sleek-table">
           <thead>
-            <tr className="border-b border-gray-800">
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Domain</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Application</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Verified</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Verified At</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Added</th>
+            <tr>
+              <th>Domain</th>
+              <th>Application</th>
+              <th>Verified</th>
+              <th>Added</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
+          <tbody>
             {(domains ?? []).length === 0 ? (
-              <tr><td colSpan={5} className="text-center text-gray-500 py-12">No domains registered</td></tr>
+              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No domains registered</td></tr>
             ) : (
-              (domains ?? []).map((d: Record<string, unknown>) => (
-                <tr key={d.id as string} className="hover:bg-gray-800/30 transition-colors">
-                  <td className="px-4 py-3 text-white font-mono text-sm">{d.domain as string}</td>
-                  <td className="px-4 py-3 text-gray-300">{(d.applications as { name: string } | null)?.name ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    {d.is_verified ? (
-                      <span className="text-green-400 text-xs bg-green-950 px-2 py-0.5 rounded">VERIFIED</span>
-                    ) : (
-                      <span className="text-yellow-400 text-xs bg-yellow-950 px-2 py-0.5 rounded">PENDING</span>
-                    )}
+              (domains as any[])!.map((d) => (
+                <tr key={d.id}>
+                  <td>
+                    <span style={{ color: 'white', fontWeight: 800 }}>{d.domain}</span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {d.verified_at ? new Date(d.verified_at as string).toLocaleDateString('en-IN') : '—'}
+                  <td>{d.applications?.name}</td>
+                  <td>
+                    <span className={`badge ${d.verified ? 'bg-success' : 'bg-warning'}`}>
+                      {d.verified ? 'Yes' : 'Pending'}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
-                    {new Date(d.created_at as string).toLocaleDateString('en-IN')}
+                  <td style={{ color: 'var(--text-muted)' }}>
+                    {new Date(d.created_at).toLocaleDateString('en-IN')}
                   </td>
                 </tr>
               ))
@@ -55,3 +59,6 @@ export default async function DomainsPage() {
     </div>
   )
 }
+
+
+

@@ -1,5 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/admin'
-import Link from 'next/link'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
+import Link from 'next/link';
+import ExportButton from './ExportButton';
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -53,7 +54,7 @@ export default async function TransactionsPage({
            </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-           <button className="btn-outline">Export CSV</button>
+           <ExportButton data={payments || []} />
         </div>
       </div>
 
@@ -117,7 +118,7 @@ export default async function TransactionsPage({
                     {p.merchant_providers?.provider ?? '—'}
                   </td>
                   <td style={{ textAlign: 'right', fontWeight: 900, color: 'white' }}>
-                    ₹{(Number(p.amount) / 100).toFixed(2)}
+₹{(Number(p.amount) / 100).toFixed(2)}
                   </td>
                   <td style={{ textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                     {p.payment_method ?? '—'}
@@ -158,3 +159,7 @@ export default async function TransactionsPage({
     </div>
   )
 }
+
+
+
+

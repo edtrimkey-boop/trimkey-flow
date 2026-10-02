@@ -8,39 +8,75 @@ export default async function ApplicationsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Applications</h1>
-        <p className="text-gray-400 text-sm mt-1">Client applications connected to Trim Key Flow</p>
+    <div className="panel">
+      <div className="panel-header">
+        <div>
+           <h3>Applications</h3>
+           <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>
+              Client applications connected to Trim Key Flow
+           </p>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {(apps ?? []).length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center text-gray-500">No applications configured</div>
-        ) : (
-          (apps ?? []).map((app: Record<string, unknown>) => (
-            <div key={app.id as string} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="text-white font-medium">{app.name as string}</p>
-                  <p className="text-gray-500 text-xs mt-0.5">{app.slug as string}</p>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded ${app.status === 'active' ? 'text-green-400 bg-green-950' : 'text-gray-400 bg-gray-800'}`}>
-                  {app.status as string}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                <div><span className="text-gray-500">Organization</span><p className="text-gray-300">{(app.organizations as { name: string } | null)?.name ?? '—'}</p></div>
-                <div><span className="text-gray-500">Environment</span><p className="text-gray-300">{(app.environment as string) ?? '—'}</p></div>
-                <div><span className="text-gray-500">Webhook URL</span><p className="text-gray-300 truncate">{(app.webhook_url as string) ?? 'Not configured'}</p></div>
-              </div>
-              {Boolean(app.description) && (
-                <p className="text-gray-500 text-xs mt-2">{String(app.description)}</p>
-              )}
-            </div>
-          ))
-        )}
+      <div className="tk-table-wrapper">
+        <table className="tk-sleek-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Organization</th>
+              <th>Environment</th>
+              <th>Status</th>
+              <th>API Keys</th>
+              <th>Domains</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(apps ?? []).length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 0' }}>
+                  No applications configured.
+                </td>
+              </tr>
+            ) : (
+              (apps ?? []).map((app: any) => (
+                <tr key={app.id}>
+                  <td style={{ fontWeight: 600, color: 'white' }}>
+                    {app.name}
+                  </td>
+                  <td style={{ color: 'var(--text-muted)' }}>
+                    {app.organizations?.name ?? '—'}
+                  </td>
+                  <td>
+                    <span className={`badge ${app.environment === 'production' ? 'bg-danger' : 'bg-info'}`}>
+                      {app.environment}
+                    </span>
+                  </td>
+                  <td>
+                    {app.status === 'active' ? (
+                      <span className="badge bg-success">Active</span>
+                    ) : (
+                      <span className="badge bg-warning">{app.status}</span>
+                    )}
+                  </td>
+                  <td style={{ color: 'white', fontWeight: 900 }}>
+                    {app.api_keys?.[0]?.count ?? 0}
+                  </td>
+                  <td style={{ color: 'white', fontWeight: 900 }}>
+                    {app.application_domains?.[0]?.count ?? 0}
+                  </td>
+                  <td>
+                    <button className="flat-pill" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', fontSize: '11px', padding: '4px 12px' }}>
+                      Manage
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
 }
+

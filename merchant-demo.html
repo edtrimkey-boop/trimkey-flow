@@ -31,7 +31,7 @@
         // NOTE TO MERCHANT: In production, this API call should happen on your BACKEND
         // so your Secret API Key is never exposed in the browser!
         
-        const TRIM_KEY_API_KEY = "tk_live_1c1c3ecd4ddfbcd157ba68049cf99f7d4016457e738380541cc9f904476dd133"; 
+        const TRIM_KEY_API_KEY = "tk_live_782ef46e1143ad0ae00a8bc461466ffcbf06365425f30137e148ab076fd8fdb7"; 
 
         async function startCheckout() {
             const btn = document.getElementById('buy-btn');
@@ -48,9 +48,9 @@
                     body: JSON.stringify({
                         action: "payment.create",
                         data: {
-                            merchant_id: "33333333-3333-3333-3333-333333333333", // The test merchant we created
+                            merchant_id: "671a032d-b500-475a-b432-69b058c1a0d9n", // The test merchant we created
                             amount: 150000, // Amount in paise (1500.00 INR)
-                            currency: "USD",
+                            currency: "INR",
                             purpose: "Nike Air Max 2026",
                             customer: {
                                 name: "Demo Customer",
