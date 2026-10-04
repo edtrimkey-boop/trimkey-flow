@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 import { createAdminClient } from '@/lib/supabase/admin'
 import { WebhookConfig } from './WebhookConfig'
 
@@ -85,5 +87,6 @@ export default async function WebhooksPage() {
     </div>
   )
 }
+
 
 

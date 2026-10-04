@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { NewRuleButton } from './NewRuleButton'
@@ -106,4 +108,5 @@ export default async function RouterPage() {
     </div>
   )
 }
+
 

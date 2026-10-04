@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AddDomainButton } from './AddDomain'
 
@@ -61,6 +63,7 @@ export default async function DomainsPage() {
     </div>
   )
 }
+
 
 
 
