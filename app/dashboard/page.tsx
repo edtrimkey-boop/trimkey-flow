@@ -43,17 +43,26 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const db = createAdminClient()
-  const { data: member } = await db
-    .from('organization_members')
-    .select('organization_id')
-    .eq('user_id', user!.id)
-    .eq('is_active', true)
-    .maybeSingle<{ organization_id: string }>()
+  const defaultStats = { todayVolume: 0, monthVolume: 0, successCount: 0, failedCount: 0, processingCount: 0, todayCount: 0, activeRules: 0, activeApps: 0 }
+  let stats = defaultStats
+  
+  if (user?.id) {
+    try {
+      const db = createAdminClient()
+      const { data: member } = await db
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle<{ organization_id: string }>()
 
-  const stats = member
-    ? await getDashboardStats(member.organization_id)
-    : { todayVolume: 0, monthVolume: 0, successCount: 0, failedCount: 0, processingCount: 0, todayCount: 0, activeRules: 0, activeApps: 0 }
+      if (member) {
+        stats = await getDashboardStats(member.organization_id)
+      }
+    } catch (e) {
+      console.error('Failed to fetch dashboard stats:', e)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -146,11 +155,19 @@ export default async function DashboardPage() {
 
 async function RecentPayments() {
   const db = createAdminClient()
-  const { data: payments } = await db
-    .from('payments')
-    .select('payment_number, amount, currency_code, status, created_at, merchants(name)')
-    .order('created_at', { ascending: false })
-    .limit(10)
+  let payments: any[] = []
+  
+  try {
+    const { data } = await db
+      .from('payments')
+      .select('payment_number, amount, currency_code, status, created_at, merchants(name)')
+      .order('created_at', { ascending: false })
+      .limit(10)
+    
+    payments = data || []
+  } catch (e) {
+    console.error('Failed to fetch recent payments:', e)
+  }
 
   return (
     <div className="panel" style={{ borderLeft: '4px solid var(--success)' }}>
