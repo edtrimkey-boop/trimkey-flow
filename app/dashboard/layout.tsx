@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { LiquidGlass } from '@/components/ui/LiquidGlass';
 import { usePathname } from "next/navigation";
 
 
@@ -124,7 +125,7 @@ export default function DashboardLayout({
         <div className="header-scrim"></div>
         
         {/* TOP BAR */}
-        <header className="top-bar">
+        <LiquidGlass as="header" className="top-bar" scale={-90} chroma={4}>
           <div className="brandRow">
             {/* Hamburger Button */}
             <button className="liquid-glass glass-circle-btn" onClick={toggleSidebar} style={{ marginRight: 10 }}>
@@ -207,7 +208,7 @@ export default function DashboardLayout({
               </div>
             </div>
           </div>
-        </header>
+        </LiquidGlass>
 
               {/* Sync Loader */}
       <div id="syncLoader" className={`glass-overlay ${isNavigating ? 'active' : ''}`} style={{ zIndex: 9999, opacity: isNavigating ? 1 : 0, pointerEvents: isNavigating ? 'all' : 'none', transition: 'opacity 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
