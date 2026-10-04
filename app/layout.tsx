@@ -41,7 +41,7 @@ export default function RootLayout({
         <div 
           className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'radial-gradient(circle at 50% 0%, #1a1a24 0%, #0a0a0c 100%)',
+            backgroundImage: 'radial-gradient(circle at 15% 50%, rgba(0, 251, 166, 0.08), transparent 35%), radial-gradient(circle at 85% 30%, rgba(40, 195, 229, 0.08), transparent 35%), radial-gradient(circle at 50% 0%, #1a1a24 0%, #0a0a0c 100%)',
             backgroundAttachment: 'fixed'
           }}
         />
