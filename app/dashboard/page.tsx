@@ -9,13 +9,15 @@ async function getDashboardStats(organizationId: string) {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  const [todayPayments, monthPayments, successCount, failedCount, processingCount] =
+  const [todayPayments, monthPayments, successCount, failedCount, processingCount, activeRules, activeApps] =
     await Promise.all([
       db.from('payments').select('amount', { count: 'exact' }).gte('created_at', todayStart),
       db.from('payments').select('amount', { count: 'exact' }).gte('created_at', monthStart),
       db.from('payments').select('*', { count: 'exact', head: true }).eq('status', 'SUCCESS').gte('created_at', monthStart),
       db.from('payments').select('*', { count: 'exact', head: true }).eq('status', 'FAILED').gte('created_at', monthStart),
       db.from('payments').select('*', { count: 'exact', head: true }).in('status', ['PENDING', 'PROCESSING']),
+      db.from('routing_rules').select('*', { count: 'exact', head: true }).eq('is_active', true),
+      db.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     ])
 
   const todayVolume = (todayPayments.data ?? []).reduce((s: number, p: { amount: number }) => s + Number(p.amount), 0)
@@ -28,6 +30,8 @@ async function getDashboardStats(organizationId: string) {
     failedCount: failedCount.count ?? 0,
     processingCount: processingCount.count ?? 0,
     todayCount: todayPayments.count ?? 0,
+    activeRules: activeRules.count ?? 0,
+    activeApps: activeApps.count ?? 0,
   }
 }
 
@@ -49,57 +53,95 @@ export default async function DashboardPage() {
 
   const stats = member
     ? await getDashboardStats(member.organization_id)
-    : { todayVolume: 0, monthVolume: 0, successCount: 0, failedCount: 0, processingCount: 0, todayCount: 0 }
+    : { todayVolume: 0, monthVolume: 0, successCount: 0, failedCount: 0, processingCount: 0, todayCount: 0, activeRules: 0, activeApps: 0 }
 
   return (
-    <>
-      <div id="panelOverview" className="panel active">
+    <div className="space-y-6">
+      <div className="premium-sticky-header">
+          <h2>Dashboard Overview</h2>
+          <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Welcome back to Trim Key Flow</div>
+      </div>
+      
+      {/* 4 KPI Cards Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
           
-          <div className="premium-sticky-header">
-              <h2>Dashboard Overview</h2>
+          <div className="glass-box nav-pill-box" style={{ padding: '20px', borderTop: '2px solid var(--brand)' }}>
+              <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Today's Revenue</h4>
+              <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '15px' }}>{formatAmount(stats.todayVolume)}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(38,195,234,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(38,195,234,0.2)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                  <span style={{ fontSize: '10px', color: 'var(--brand)', fontWeight: 800, textTransform: 'uppercase' }}>{stats.todayCount} payments today</span>
+              </div>
           </div>
           
-          <div className="grid-3" style={{ marginBottom: '25px' }}>
-              <div className="glass-box nav-pill-box" style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                      <div className="glass-circle-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-                  </div>
-                  <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Today's Revenue</h4>
-                  <h2 id="uiTodayRevenueCard" style={{ fontSize: '36px', fontWeight: 900, marginBottom: '15px' }}>{formatAmount(stats.todayVolume)}</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(46,204,113,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(46,204,113,0.2)' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                      <span style={{ fontSize: '10px', color: 'var(--success)', fontWeight: 800, textTransform: 'uppercase' }}>{stats.todayCount} payments today</span>
-                  </div>
+          <div className="glass-box nav-pill-box" style={{ padding: '20px', borderTop: '2px solid var(--success)' }}>
+              <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Month Volume</h4>
+              <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '15px' }}>{formatAmount(stats.monthVolume)}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(46,204,113,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(46,204,113,0.2)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg>
+                  <span style={{ fontSize: '10px', color: 'var(--success)', fontWeight: 800, textTransform: 'uppercase' }}>All Transactions</span>
               </div>
-              
-              <div className="glass-box nav-pill-box" style={{ padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                      <div className="glass-circle-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg></div>
-                  </div>
-                  <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Month Volume</h4>
-                  <h2 style={{ fontSize: '36px', fontWeight: 900, marginBottom: '15px', color: 'var(--brand)' }}>{formatAmount(stats.monthVolume)}</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(0,251,166,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(0,251,166,0.2)' }}>
-                      <span style={{ fontSize: '10px', color: 'var(--brand)', fontWeight: 800, textTransform: 'uppercase' }}>All Transactions</span>
-                  </div>
-              </div>
+          </div>
 
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '25px', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--success)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', top: '-20px', right: '-20px', opacity: 0.05 }}>
-                      <svg width="120" height="120" viewBox="0 0 24 24" fill="var(--success)"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                  </div>
-                  <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Successful Payments</h4>
-                  <h2 id="uiTotalEarnedCard" style={{ color: 'var(--success)', fontSize: '36px', fontWeight: 900, marginBottom: '15px', textShadow: '0 0 20px rgba(46, 204, 113, 0.4)' }}>{stats.successCount}</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(46,204,113,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(46,204,113,0.2)' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                      <span style={{ fontSize: '10px', color: 'var(--success)', fontWeight: 800, textTransform: 'uppercase' }}>Auto-Payout Active</span>
-                  </div>
+          <div className="glass-box nav-pill-box" style={{ padding: '20px', borderTop: '2px solid var(--info)' }}>
+              <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Successful Payments</h4>
+              <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '15px' }}>{stats.successCount}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(41,128,185,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(41,128,185,0.2)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--info)" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span style={{ fontSize: '10px', color: 'var(--info)', fontWeight: 800, textTransform: 'uppercase' }}>Secure processing</span>
               </div>
           </div>
-          
+
+          <div className="glass-box nav-pill-box" style={{ padding: '20px', borderTop: '2px solid var(--warning)' }}>
+              <h4 style={{ color: 'var(--text-muted)', fontSize: '11px', textTransform: 'uppercase', fontWeight: 800, marginBottom: '5px', letterSpacing: '1px' }}>Active Rules & Apps</h4>
+              <h2 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '15px' }}>{stats.activeRules} / {stats.activeApps}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(243,156,18,0.1)', padding: '6px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(243,156,18,0.2)' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  <span style={{ fontSize: '10px', color: 'var(--warning)', fontWeight: 800, textTransform: 'uppercase' }}>Routing Active</span>
+              </div>
+          </div>
+      </div>
+
+      {/* Quick Access Actions */}
+      <div className="panel" style={{ padding: '20px' }}>
+          <h3 style={{ marginBottom: '15px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Quick Actions</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px' }}>
+              <Link href="/dashboard/merchants" className="btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '20px', textAlign: 'center', textDecoration: 'none' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <div>
+                      <div style={{ fontWeight: 800, fontSize: '13px', color: 'white' }}>Connect Merchant</div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Stripe, Razorpay, etc.</div>
+                  </div>
+              </Link>
+              
+              <Link href="/dashboard/applications" className="btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '20px', textAlign: 'center', textDecoration: 'none' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  <div>
+                      <div style={{ fontWeight: 800, fontSize: '13px', color: 'white' }}>Create Application</div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Setup a new integration</div>
+                  </div>
+              </Link>
+
+              <Link href="/dashboard/api-keys" className="btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '20px', textAlign: 'center', textDecoration: 'none' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                  <div>
+                      <div style={{ fontWeight: 800, fontSize: '13px', color: 'white' }}>Generate API Key</div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>For backend access</div>
+                  </div>
+              </Link>
+
+              <Link href="/dashboard/router" className="btn-outline" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '20px', textAlign: 'center', textDecoration: 'none' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--info)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                  <div>
+                      <div style={{ fontWeight: 800, fontSize: '13px', color: 'white' }}>Smart Router</div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Configure routing rules</div>
+                  </div>
+              </Link>
+          </div>
       </div>
 
       <RecentPayments />
-    </>
+    </div>
   )
 }
 
@@ -169,4 +211,3 @@ function StatusBadge({ status }: { status: string }) {
   const cls = styles[status] || 'bg-info'
   return <span className={`badge ${cls}`} style={{ padding: '6px 12px', borderRadius: '50px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase' }}>{status}</span>
 }
-
