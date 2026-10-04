@@ -1,29 +1,32 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generateApiKey } from '@/lib/api-key'
 
-export async function generateNewKeyAction() {
+export async function getApplicationsAction() {
+  const db = createAdminClient()
+  const { data } = await db.from('applications').select('id, name').order('created_at', { ascending: false })
+  return data || []
+}
+
+export async function generateNewKeyAction(applicationId: string, environment: string) {
   const db = createAdminClient()
   
-  // We will attach it to the dummy application we created in seed.sql
-  const dummyAppId = '22222222-2222-2222-2222-222222222222'
-  
   // Generate the cryptographic key
-  const generated = generateApiKey('live')
+  const generated = generateApiKey(environment)
 
   const { data: apiKey, error } = await db
     .from('api_keys')
     .insert({
-      application_id: dummyAppId,
-      name: 'Generated Live Key',
+      application_id: applicationId,
+      name: `Generated ${environment === 'live' ? 'Live' : 'Test'} Key`,
       key_prefix: generated.keyPrefix,
       secret_hash: generated.secretHash,
-      environment: 'live',
+      environment: environment,
       permissions: ['payments:create', 'payments:read', 'orders:read'],
     })
-    .select()
+    .select('*, applications(name)')
     .single()
 
   if (error) {
@@ -40,17 +43,14 @@ export async function generateNewKeyAction() {
 
 export async function getExistingKeysAction() {
   const db = createAdminClient()
-  const dummyAppId = '22222222-2222-2222-2222-222222222222'
   
   const { data } = await db
     .from('api_keys')
-    .select('*')
-    .eq('application_id', dummyAppId)
+    .select('*, applications(name)')
     .order('created_at', { ascending: false })
     
   return data || []
 }
-
 
 export async function revokeKeyAction(keyId: string) {
   const db = createAdminClient()

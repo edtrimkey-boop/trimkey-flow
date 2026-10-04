@@ -1,4 +1,4 @@
-﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { AddDomainButton } from './AddDomain'
 
 export default async function DomainsPage() {
@@ -7,6 +7,8 @@ export default async function DomainsPage() {
     .from('application_domains')
     .select('*, applications(name)')
     .order('created_at', { ascending: false })
+
+  const { data: apps } = await db.from('applications').select('id, name').order('created_at', { ascending: false })
 
   return (
     <div className="panel">
@@ -18,7 +20,7 @@ export default async function DomainsPage() {
            </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-           <AddDomainButton />
+           <AddDomainButton applications={apps || []} />
         </div>
       </div>
 

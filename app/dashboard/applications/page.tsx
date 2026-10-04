@@ -1,4 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ManageAppButton } from './ManageAppButton'
+import { NewAppButton } from './NewAppButton'
 
 export default async function ApplicationsPage() {
   const db = createAdminClient()
@@ -6,6 +8,8 @@ export default async function ApplicationsPage() {
     .from('applications')
     .select('*, organizations(name), api_keys(count), application_domains(count)')
     .order('created_at', { ascending: false })
+    
+  const { data: org } = await db.from('organizations').select('id').limit(1).single()
 
   return (
     <div className="panel">
@@ -16,6 +20,11 @@ export default async function ApplicationsPage() {
               Client applications connected to Trim Key Flow
            </p>
         </div>
+        {org && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <NewAppButton orgId={org.id} />
+          </div>
+        )}
       </div>
 
       <div className="tk-table-wrapper">
@@ -45,7 +54,7 @@ export default async function ApplicationsPage() {
                     {app.name}
                   </td>
                   <td style={{ color: 'var(--text-muted)' }}>
-                    {app.organizations?.name ?? '—'}
+                    {app.organizations?.name ?? 'â€”'}
                   </td>
                   <td>
                     <span className={`badge ${app.environment === 'production' ? 'bg-danger' : 'bg-info'}`}>
@@ -79,4 +88,5 @@ export default async function ApplicationsPage() {
     </div>
   )
 }
+
 

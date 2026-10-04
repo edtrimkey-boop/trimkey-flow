@@ -1,4 +1,4 @@
-﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { WebhookConfig } from './WebhookConfig'
 
 export default async function WebhooksPage() {
@@ -9,6 +9,8 @@ export default async function WebhooksPage() {
     .order('created_at', { ascending: false })
     .limit(50)
 
+  const { data: apps } = await db.from('applications').select('id, name, webhook_url').order('created_at', { ascending: false })
+
   return (
     <div className="panel">
       <div className="panel-header">
@@ -17,6 +19,9 @@ export default async function WebhooksPage() {
            <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>
               Real-time audit of all external provider callbacks
            </p>
+        </div>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <WebhookConfig applications={apps || []} />
         </div>
       </div>
 

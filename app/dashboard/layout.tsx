@@ -19,6 +19,18 @@ export default function DashboardLayout({
   const [isNavigating, setIsNavigating] = useState(false);
   const previousPathname = useRef(pathname);
 
+  const [profileData, setProfileData] = useState({
+    user_name: 'Admin User',
+    user_email: 'admin@trimkey.in',
+    organization_name: 'Trim Key Corp'
+  });
+
+  useEffect(() => {
+    fetch('/api/profile').then(res => res.json()).then(data => {
+      if (data) setProfileData(data);
+    }).catch(console.error);
+  }, []);
+
   // Close dropdowns when clicking outside
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -158,9 +170,9 @@ export default function DashboardLayout({
 
             {/* User Profile Dropdown */}
             <div ref={profileRef} className={`liquid-glass user-profile-container flex ${isProfileOpen ? "active" : ""}`} onClick={() => setProfileOpen(!isProfileOpen)} style={{ padding: "6px 16px 6px 6px" }}>
-              <div className="avatar-circle bg-gradient-to-br from-brand to-[#059669]">A</div>
+              <div className="avatar-circle bg-gradient-to-br from-brand to-[#059669]">{profileData.user_name ? profileData.user_name.charAt(0).toUpperCase() : "A"}</div>
               <div className="desktop-only" style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>Admin User</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{profileData.user_name}</span>
               </div>
               <span className="profile-chevron" style={{ color: "var(--text-muted)", marginLeft: 10 }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -168,12 +180,12 @@ export default function DashboardLayout({
               
               <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} onClick={(e) => e.stopPropagation()}>
                 <div className="dropdown-header">
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>Admin User</div>
-                  <div className="dropdown-email">admin@trimkey.in</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>{profileData.user_name}</div>
+                  <div className="dropdown-email">{profileData.user_email}</div>
                   <div className="dropdown-role bg-brand/10 text-brand">System Admin</div>
                     <div className="dropdown-org" style={{ marginTop: '8px', padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
                       <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Organisation</div>
-                      <div style={{ fontSize: '13px', color: 'white', fontWeight: 600 }}>Trim Key Corp</div>
+                      <div style={{ fontSize: '13px', color: 'white', fontWeight: 600 }}>{profileData.organization_name}</div>
                     </div>
                 </div>
 
@@ -266,6 +278,8 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+
 
 
 

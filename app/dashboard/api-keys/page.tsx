@@ -1,26 +1,32 @@
 ﻿'use client'
 
 import React, { useState, useEffect } from 'react'
-import { generateNewKeyAction, getExistingKeysAction } from './actions'
+import { generateNewKeyAction, getExistingKeysAction, getApplicationsAction } from './actions'
 import { DomainManager } from './DomainManager'
 import { useToast } from '@/components/ui/ToastProvider'
+import { GenerateKeyModal } from './GenerateKeyModal'
 
 export default function ApiKeysPage() {
   const { showToast } = useToast()
   const [keys, setKeys] = useState<any[]>([])
+  const [applications, setApplications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
   const [revealStates, setRevealStates] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    loadKeys()
+    loadData()
   }, [])
 
-  async function loadKeys() {
+  async function loadData() {
     setLoading(true)
     try {
-      const data = await getExistingKeysAction()
-      setKeys(data)
+      const [keysData, appsData] = await Promise.all([
+        getExistingKeysAction(),
+        getApplicationsAction()
+      ])
+      setKeys(keysData)
+      setApplications(appsData)
     } catch (err) {
       console.error(err)
     } finally {
@@ -28,10 +34,10 @@ export default function ApiKeysPage() {
     }
   }
 
-  async function handleGenerate() {
+  async function handleGenerate(appId: string, env: string) {
     setIsGenerating(true)
     try {
-      const newKey = await generateNewKeyAction()
+      const newKey = await generateNewKeyAction(appId, env)
       // Add the new key to the top of the list, injecting the full_secret 
       // so it can be seen once by the user.
       setKeys((prev) => [{
@@ -65,7 +71,7 @@ export default function ApiKeysPage() {
       <div style={{ background: 'linear-gradient(135deg, var(--danger), #B91C1C)', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 10px 25px rgba(239,68,68,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div>
           <div style={{ fontWeight: 900, fontSize: '14px', color: 'white', marginBottom: '4px' }}>
-            <span style={{ marginRight: '8px' }}>âš ï¸</span> 
+            <span style={{ marginRight: '8px' }}>Ã¢Å¡Â Ã¯Â¸Â</span> 
             SECURITY NOTICE
           </div>
           <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>
@@ -82,22 +88,18 @@ export default function ApiKeysPage() {
                 Manage authentication keys for your server integrations.
              </p>
           </div>
-          <button 
-            onClick={handleGenerate} 
-            disabled={isGenerating}
-            className="liquid-glass" 
-            style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 800, opacity: isGenerating ? 0.5 : 1 }}
-          >
-            <span style={{ fontSize: '14px', marginRight: '6px', verticalAlign: 'middle' }}>+</span>
-            {isGenerating ? 'Generating...' : 'Generate New Key'}
-          </button>
+          <GenerateKeyModal 
+            applications={applications}
+            isGenerating={isGenerating}
+            onGenerate={handleGenerate}
+          />
         </div>
 
         <div className="tk-table-wrapper" style={{ marginTop: '20px' }}>
           <table className="tk-sleek-table">
             <thead>
               <tr>
-                <th>Environment</th>
+                <th>Application</th><th>Environment</th>
                 <th>Secret Key</th>
                 <th>Created</th>
                 <th>Last Used</th>
@@ -108,13 +110,13 @@ export default function ApiKeysPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
                     Loading keys...
                   </td>
                 </tr>
               ) : keys.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
                     No keys found. Generate one to get started.
                   </td>
                 </tr>
@@ -123,11 +125,7 @@ export default function ApiKeysPage() {
                   const isRevealed = revealStates[k.id] || false;
                   return (
                     <tr key={k.id} style={k.isNew ? { background: 'rgba(38,195,234,0.1)' } : {}}>
-                      <td>
-                        <span className={`badge ${k.environment === 'live' ? 'bg-success' : 'bg-warning'}`}>
-                          {k.environment.toUpperCase()}
-                        </span>
-                      </td>
+                      <td><span style={{ fontWeight: 800, color: "white" }}>{k.applications?.name || "Unknown App"}</span></td><td><span className={`badge ${k.environment === 'live' ? 'bg-success' : 'bg-warning'}`}>{k.environment.toUpperCase()}</span></td>
                       <td>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                           <code style={{ 
@@ -187,4 +185,5 @@ export default function ApiKeysPage() {
     </div>
   )
 }
+
 

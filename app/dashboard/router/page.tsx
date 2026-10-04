@@ -10,6 +10,11 @@ export default async function RouterPage() {
     .from('routing_rules')
     .select('*, merchant_providers(provider, merchants(name))')
     .order('priority', { ascending: true })
+    
+  const { data: providers } = await db
+    .from('merchant_providers')
+    .select('id, provider, merchant_id, merchants(name)')
+    .eq('is_active', true)
 
   // Group by merchant for UI display
   const merchants = Array.from(new Set((rules as any[] || []).map(r => r.merchant_id)))
@@ -24,7 +29,7 @@ export default async function RouterPage() {
            </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-           <NewRuleButton />
+           <NewRuleButton providers={providers || []} />
         </div>
       </div>
 
