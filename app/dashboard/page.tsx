@@ -57,9 +57,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="premium-sticky-header">
-          <h2>Dashboard Overview</h2>
-          <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Welcome back to Trim Key Flow</div>
+      <div style={{ marginBottom: '5px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'white', letterSpacing: '0.5px' }}>Welcome back to Trim Key Flow</h2>
       </div>
       
       {/* 4 KPI Cards Grid */}
