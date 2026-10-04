@@ -1,6 +1,4 @@
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { generateNewKeyAction, getExistingKeysAction, getApplicationsAction } from './actions'
@@ -73,7 +71,7 @@ export default function ApiKeysPage() {
       <div style={{ background: 'linear-gradient(135deg, var(--danger), #B91C1C)', padding: '20px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 10px 25px rgba(239,68,68,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <div>
           <div style={{ fontWeight: 900, fontSize: '14px', color: 'white', marginBottom: '4px' }}>
-            <span style={{ marginRight: '8px' }}>âš ï¸</span> 
+            <span style={{ marginRight: '8px' }}>Ã¢Å¡Â Ã¯Â¸Â</span> 
             SECURITY NOTICE
           </div>
           <div style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>
@@ -187,6 +185,5 @@ export default function ApiKeysPage() {
     </div>
   )
 }
-
 
 

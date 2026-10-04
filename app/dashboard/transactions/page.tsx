@@ -1,6 +1,4 @@
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-import { createAdminClient } from '@/lib/supabase/admin'
+ï»¿import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link';
 import ExportButton from './ExportButton';
 
@@ -111,19 +109,19 @@ export default async function TransactionsPage({
                     {p.payment_number}
                   </td>
                   <td>
-                    {p.applications?.name ?? '—'}
+                    {p.applications?.name ?? 'â€”'}
                   </td>
                   <td style={{ color: 'rgba(255,255,255,0.8)' }}>
-                    {p.merchants?.name ?? '—'}
+                    {p.merchants?.name ?? 'â€”'}
                   </td>
                   <td style={{ textTransform: 'capitalize', color: 'var(--text-muted)' }}>
-                    {p.merchant_providers?.provider ?? '—'}
+                    {p.merchant_providers?.provider ?? 'â€”'}
                   </td>
                   <td style={{ textAlign: 'right', fontWeight: 900, color: 'white' }}>
-?{(Number(p.amount) / 100).toFixed(2)}
+â‚¹{(Number(p.amount) / 100).toFixed(2)}
                   </td>
                   <td style={{ textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                    {p.payment_method ?? '—'}
+                    {p.payment_method ?? 'â€”'}
                   </td>
                   <td>
                     <StatusBadge status={p.status} />
@@ -161,7 +159,6 @@ export default async function TransactionsPage({
     </div>
   )
 }
-
 
 
 

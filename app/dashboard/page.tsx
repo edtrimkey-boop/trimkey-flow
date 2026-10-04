@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
@@ -212,4 +210,3 @@ function StatusBadge({ status }: { status: string }) {
   const cls = styles[status] || 'bg-info'
   return <span className={`badge ${cls}`} style={{ padding: '6px 12px', borderRadius: '50px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase' }}>{status}</span>
 }
-

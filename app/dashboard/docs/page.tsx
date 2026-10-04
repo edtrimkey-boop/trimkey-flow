@@ -1,11 +1,9 @@
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export default function DocsPage() {
+﻿export default function DocsPage() {
   return (
     <div className="tk-table-wrapper" style={{ maxWidth: '900px' }}>
       <div className="panel-header">
         <h1 style={{ color: 'white', fontWeight: 800, fontSize: '20px' }}>API Documentation</h1>
-        <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>Trim Key Flow V1 — Payment Infrastructure API</p>
+        <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>Trim Key Flow V1 â€” Payment Infrastructure API</p>
       </div>
 
       <div className="space-y-8">
@@ -210,5 +208,4 @@ function Code({ children }: { children: string }) {
     </pre>
   )
 }
-
 
