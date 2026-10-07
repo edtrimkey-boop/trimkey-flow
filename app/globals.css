@@ -107,7 +107,7 @@
   /* 🔥 UNIVERSAL APPLE GLASS PHYSICS */
   --glass-blur: url(#liquid-refraction);
   --glass-blur-safari: blur(25px) saturate(200%);
-  --glass-bg: rgba(15, 20, 30, 10%); 
+  --glass-bg: rgba(15, 20, 30, 0.65); 
   --glass-border: 1px solid rgba(255, 255, 255, 0.12);
   --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.2); 
   --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
@@ -1104,7 +1104,7 @@ h1, h2, h3, .premium-sticky-header h2, .panel h2, .glass-title-pill h3 {
   
   /* 🔥 UNIVERSAL APPLE GLASS PHYSICS */
   --glass-blur: url(#liquid-refraction);
-  --glass-bg: rgba(15, 20, 30, 10%); 
+  --glass-bg: rgba(15, 20, 30, 0.65); 
   --glass-border: 1px solid rgba(255, 255, 255, 0.12);
   --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.2); 
   --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
