@@ -56,6 +56,17 @@ export default function RootLayout({
           </filter>
         </svg>
 
+
+        {/* Hidden Apple Liquid Refraction SVG Filter */}
+<svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none' }} aria-hidden="true">
+  <filter id="liquid-refraction">
+    <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
+
+
+
         {/* 4. Render main application views */}
         {children}
         </ToastProvider></ConfirmProvider>
