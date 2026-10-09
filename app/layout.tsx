@@ -53,10 +53,6 @@ export default function RootLayout({
             backdrop-filter: blur(40px) saturate(200%) !important;
             -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
           }
-          .user-profile-container, .notification-wrapper {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-          }
         ` }} />
         {/* TRUE LIQUID REFRACTION ENGINE */}
         <svg style={{ position: 'fixed', top: 0, left: 0, width: '1px', height: '1px', opacity: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden="true" focusable="false">

@@ -148,13 +148,15 @@ export default function DashboardLayout({
           
           <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
             {/* Notification Bell */}
-            <div ref={notifRef} className="liquid-glass glass-circle-btn notification-wrapper flex" onClick={() => setNotifOpen(!isNotifOpen)} style={{ borderColor: "transparent" }}>
-              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-              </svg>
-              <span className="notification-badge" style={{ display: "flex" }}>3</span>
+            <div ref={notifRef} style={{ position: "relative" }}>
+              <div className="liquid-glass glass-circle-btn notification-wrapper flex" onClick={() => setNotifOpen(!isNotifOpen)} style={{ borderColor: "transparent" }}>
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
+                  <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                <span className="notification-badge" style={{ display: "flex" }}>3</span>
+              </div>
               
-              <div className={`notif-dropdown ${isNotifOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)" }} onClick={(e) => e.stopPropagation()}>
+              <div className={`notif-dropdown ${isNotifOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.12)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="notif-header">
                   <span>System Alerts</span>
                   <span style={{ fontSize: 10, color: "var(--brand)", cursor: "pointer" }}>Mark all read</span>
@@ -170,16 +172,18 @@ export default function DashboardLayout({
             </div>
 
             {/* User Profile Dropdown */}
-            <div ref={profileRef} className={`liquid-glass user-profile-container flex ${isProfileOpen ? "active" : ""}`} onClick={() => setProfileOpen(!isProfileOpen)} style={{ padding: "6px 16px 6px 6px" }}>
-              <div className="avatar-circle bg-gradient-to-br from-brand to-[#059669]">{profileData.user_name ? profileData.user_name.charAt(0).toUpperCase() : "A"}</div>
-              <div className="desktop-only" style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{profileData.user_name}</span>
+            <div ref={profileRef} style={{ position: "relative" }}>
+              <div className={`liquid-glass user-profile-container flex ${isProfileOpen ? "active" : ""}`} onClick={() => setProfileOpen(!isProfileOpen)} style={{ padding: "6px 16px 6px 6px" }}>
+                <div className="avatar-circle bg-gradient-to-br from-brand to-[#059669]">{profileData.user_name ? profileData.user_name.charAt(0).toUpperCase() : "A"}</div>
+                <div className="desktop-only" style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: "var(--text)" }}>{profileData.user_name}</span>
+                </div>
+                <span className="profile-chevron" style={{ color: "var(--text-muted)", marginLeft: 10 }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </span>
               </div>
-              <span className="profile-chevron" style={{ color: "var(--text-muted)", marginLeft: 10 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </span>
               
-              <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)" }} onClick={(e) => e.stopPropagation()}>
+              <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.12)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="dropdown-header">
                   <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>{profileData.user_name}</div>
                   <div className="dropdown-email">{profileData.user_email}</div>
