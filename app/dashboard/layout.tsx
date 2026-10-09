@@ -156,7 +156,7 @@ export default function DashboardLayout({
                 <span className="notification-badge" style={{ display: "flex" }}>3</span>
               </div>
               
-              <div className={`notif-dropdown ${isNotifOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.12)" }} onClick={(e) => e.stopPropagation()}>
+              <div className={`notif-dropdown ${isNotifOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(10, 15, 25, 0.75)", border: "1px solid rgba(255, 255, 255, 0.15)", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="notif-header">
                   <span>System Alerts</span>
                   <span style={{ fontSize: 10, color: "var(--brand)", cursor: "pointer" }}>Mark all read</span>
@@ -183,7 +183,7 @@ export default function DashboardLayout({
                 </span>
               </div>
               
-              <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.12)" }} onClick={(e) => e.stopPropagation()}>
+              <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(10, 15, 25, 0.75)", border: "1px solid rgba(255, 255, 255, 0.15)", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="dropdown-header">
                   <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>{profileData.user_name}</div>
                   <div className="dropdown-email">{profileData.user_email}</div>
