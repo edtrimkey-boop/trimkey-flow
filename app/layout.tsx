@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 
 import { ToastProvider } from "@/components/ui/ToastProvider";
 
+import GlassDiagnostic from '@/components/GlassDiagnostic';
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -68,6 +69,7 @@ export default function RootLayout({
 
 
         {/* 4. Render main application views */}
+        <GlassDiagnostic />
         {children}
         </ToastProvider></ConfirmProvider>
       </body>
