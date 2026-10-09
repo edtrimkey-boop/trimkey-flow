@@ -840,7 +840,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
     --text: #0F172A;
     --text-muted: #64748B;
     --border: rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(10, 15, 25, 0.75);
 }
 
 [data-theme="light"] body { background: var(--bg); color: var(--text); }
@@ -1920,7 +1920,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
     --text: #0F172A;
     --text-muted: #64748B;
     --border: rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(10, 15, 25, 0.75);
 }
 
 [data-theme="light"] body { background: var(--bg); color: var(--text); }
