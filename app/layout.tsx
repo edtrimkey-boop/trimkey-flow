@@ -47,6 +47,13 @@ export default function RootLayout({
           }}
         />
         
+                {/* CSS MINIFIER BYPASS: Force Liquid Glass Physics */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .liquid-glass, .panel, .kpi-card, .premium-sticky-header, .glass-box, .nav-pill-box, .fab-action-sheet, .glass-overlay, .profile-dropdown, .notif-dropdown, .glass-title-pill, .tk-toast, .nav-tab.active {
+            backdrop-filter: blur(40px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+          }
+        ` }} />
         {/* TRUE LIQUID REFRACTION ENGINE */}
         <svg style={{ position: 'fixed', top: 0, left: 0, width: '1px', height: '1px', opacity: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden="true" focusable="false">
           <filter id="liquid-refraction" x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
