@@ -1,4 +1,4 @@
-/* globals.css — Trim Key Flow Design System */
+﻿/* globals.css â€” Trim Key Flow Design System */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -104,7 +104,7 @@
   --radius-lg: 16px;   
   --radius-pill: 50px; 
   
-  /* 🔥 UNIVERSAL APPLE GLASS PHYSICS */
+  /* ðŸ”¥ UNIVERSAL APPLE GLASS PHYSICS */
   --glass-blur: blur(40px) saturate(200%);
   --glass-blur-safari: blur(40px) saturate(200%);
   --glass-bg: rgba(10, 15, 25, 0.75); 
@@ -117,7 +117,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
 
 /* =======================================================
-   💻 DESKTOP SAFEGUARDS (Hides mobile UI on big screens)
+   ðŸ’» DESKTOP SAFEGUARDS (Hides mobile UI on big screens)
    ======================================================= */
 @media (min-width: 951px) {
     #mobile-nav-bar, 
@@ -213,7 +213,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter:
     width: 260px; flex-shrink: 0; background: var(--sidebar); height: 100%; padding: 15px 0 0 0; 
     display: flex; flex-direction: column; z-index: 2000; border-right: 1px solid var(--border); 
     overflow-x: hidden; overflow-y: auto;
-    /* 🔥 FIX 2: Animate ALL properties so Width collapses smoothly */
+    /* ðŸ”¥ FIX 2: Animate ALL properties so Width collapses smoothly */
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
 }
 .sidebar.collapsed { width: 0; border: none; opacity: 0; pointer-events: none; padding-left: 0; padding-right: 0; }
@@ -230,7 +230,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter:
 
 .top-bar { height: 75px; flex-shrink: 0; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; position: sticky; top: 0; z-index: 100;}
 
-/* 🔥 FIX 3: Perfectly Spaced Header Icons */
+/* ðŸ”¥ FIX 3: Perfectly Spaced Header Icons */
 .brandRow { display: flex; align-items: center; gap: 20px !important; }
 .top-bar > div:last-child { display: flex; align-items: center; gap: 20px !important; }
 
@@ -271,7 +271,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter:
 .logout-btn:hover {background: linear-gradient(135deg, var(--danger), #B91C1C) !important; color: #ffffff !important;border-color: transparent !important;box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);}
 
 /* =======================================================
-   🔥 ISOLATED GLASS TITLE PILL
+   ðŸ”¥ ISOLATED GLASS TITLE PILL
    ======================================================= */
 .glass-title-pill {
     background: rgba(255, 255, 255, 0.04); 
@@ -563,7 +563,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
 .op-ws-details { display: flex; flex-direction: column; gap: 4px; }
 
 /* =======================================================
-   🔥 PREMIUM COLLAPSED SIDEBAR (DESKTOP MINI-MODE)
+   ðŸ”¥ PREMIUM COLLAPSED SIDEBAR (DESKTOP MINI-MODE)
    ======================================================= */
 @media (min-width: 951px) {
     .sidebar.collapsed { 
@@ -648,15 +648,15 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
       transform: translateX(-100%); 
       z-index: 3000;
       background: var(--bg) !important;
-      box-shadow: 0 0 0 rgba(0,0,0,0); /* 🔥 FIX: No shadow when closed */
-      /* 🔥 FIX: Apple-style spring animation */
+      box-shadow: 0 0 0 rgba(0,0,0,0); /* ðŸ”¥ FIX: No shadow when closed */
+      /* ðŸ”¥ FIX: Apple-style spring animation */
       transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.5s ease, opacity 0.5s ease;
   } 
   .sidebar.open { 
       transform: translateX(0); 
       opacity: 1; 
       pointer-events: auto; 
-      box-shadow: 15px 0 40px rgba(0,0,0,0.4); /* 🔥 FIX: Shadow only applies when open */
+      box-shadow: 15px 0 40px rgba(0,0,0,0.4); /* ðŸ”¥ FIX: Shadow only applies when open */
   }
   
   .mobile-close-btn { 
@@ -712,7 +712,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
   .mobile-action-row button { flex: 1; padding: 12px 10px !important; font-size: 11px !important; justify-content: center; }
 
  /* =======================================================
-     🍏 PREMIUM iOS SEPARATED PILL & FLOATING FAB ENGINE
+     ðŸ PREMIUM iOS SEPARATED PILL & FLOATING FAB ENGINE
      ======================================================= */
   .sidebar { display: none !important; } 
   .top-bar .brandRow button { display: none !important; } 
@@ -767,7 +767,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
       transition: 0.3s ease; stroke: currentColor !important; margin: 0 !important; 
   }
   
-  /* 🔥 THE NEW FULL-AREA ACTIVE HIGHLIGHT */
+  /* ðŸ”¥ THE NEW FULL-AREA ACTIVE HIGHLIGHT */
   .nav-tab.active { 
       background: rgba(255, 255, 255, 0.1) !important; /* Highlights the whole button */
       color: var(--brand) !important; 
@@ -882,7 +882,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
 .search-icon { 
     position: absolute; 
     left: 16px; 
-    /* 🔥 THE FIX: Absolute margin-auto centering creates a flawless, dedicated physical space */
+    /* ðŸ”¥ THE FIX: Absolute margin-auto centering creates a flawless, dedicated physical space */
     top: 0; 
     bottom: 0; 
     margin: auto; 
@@ -894,7 +894,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
     z-index: 2;
 }
 
-/* 🔥 Added input[type="text"] to beat the global CSS rules */
+/* ðŸ”¥ Added input[type="text"] to beat the global CSS rules */
 input[type="text"].search-input { 
     width: 100%; 
     background: rgba(255, 255, 255, 0.03); 
@@ -903,7 +903,7 @@ input[type="text"].search-input {
     border: 1px solid rgba(255, 255, 255, 0.1); 
     border-radius: var(--radius-pill); 
     
-    /* 🔥 FORCED padding-left so the text clears the icon perfectly */
+    /* ðŸ”¥ FORCED padding-left so the text clears the icon perfectly */
     padding: 12px 20px 12px 44px !important; 
     
     color: white; 
@@ -956,7 +956,7 @@ mark.highlight-match {
 }
 
 /* =======================================================
-   📋 ADMIN PIPELINE: TRACKING & ACTION BUTTONS
+   ðŸ“‹ ADMIN PIPELINE: TRACKING & ACTION BUTTONS
    ======================================================= */
 .btn-action-download {
     background: rgba(46, 204, 113, 0.1);
@@ -1102,7 +1102,7 @@ h1, h2, h3, .premium-sticky-header h2, .panel h2, .glass-title-pill h3 {
   --radius-lg: 16px;   
   --radius-pill: 50px; 
   
-  /* 🔥 UNIVERSAL APPLE GLASS PHYSICS */
+  /* ðŸ”¥ UNIVERSAL APPLE GLASS PHYSICS */
   --glass-blur: blur(40px) saturate(200%);
   --glass-bg: rgba(10, 15, 25, 0.75); 
   --glass-border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1115,7 +1115,7 @@ h1, h2, h3, .premium-sticky-header h2, .panel h2, .glass-title-pill h3 {
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
 
 /* =======================================================
-   💻 DESKTOP SAFEGUARDS (Hides mobile UI on big screens)
+   ðŸ’» DESKTOP SAFEGUARDS (Hides mobile UI on big screens)
    ======================================================= */
 @media (min-width: 951px) {
     #mobile-nav-bar, 
@@ -1211,7 +1211,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter:
     width: 260px; flex-shrink: 0; background: var(--sidebar); height: 100%; padding: 15px 0 0 0; 
     display: flex; flex-direction: column; z-index: 2000; border-right: 1px solid var(--border); 
     overflow-x: hidden; overflow-y: auto;
-    /* 🔥 FIX 2: Animate ALL properties so Width collapses smoothly */
+    /* ðŸ”¥ FIX 2: Animate ALL properties so Width collapses smoothly */
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
 }
 .sidebar.collapsed { width: 0; border: none; opacity: 0; pointer-events: none; padding-left: 0; padding-right: 0; }
@@ -1228,7 +1228,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter:
 
 .top-bar { height: 75px; flex-shrink: 0; background: transparent; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; position: sticky; top: 0; z-index: 100;}
 
-/* 🔥 FIX 3: Perfectly Spaced Header Icons */
+/* ðŸ”¥ FIX 3: Perfectly Spaced Header Icons */
 .brandRow { display: flex; align-items: center; gap: 20px !important; }
 .top-bar > div:last-child { display: flex; align-items: center; gap: 20px !important; }
 
@@ -1269,7 +1269,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter:
 .logout-btn:hover {background: linear-gradient(135deg, var(--danger), #B91C1C) !important; color: #ffffff !important;border-color: transparent !important;box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);}
 
 /* =======================================================
-   🔥 ISOLATED GLASS TITLE PILL
+   ðŸ”¥ ISOLATED GLASS TITLE PILL
    ======================================================= */
 .glass-title-pill {
     background: rgba(255, 255, 255, 0.04); 
@@ -1641,7 +1641,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
 .op-ws-details { display: flex; flex-direction: column; gap: 4px; }
 
 /* =======================================================
-   🔥 PREMIUM COLLAPSED SIDEBAR (DESKTOP MINI-MODE)
+   ðŸ”¥ PREMIUM COLLAPSED SIDEBAR (DESKTOP MINI-MODE)
    ======================================================= */
 @media (min-width: 951px) {
     .sidebar.collapsed { 
@@ -1726,15 +1726,15 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
       transform: translateX(-100%); 
       z-index: 3000;
       background: var(--bg) !important;
-      box-shadow: 0 0 0 rgba(0,0,0,0); /* 🔥 FIX: No shadow when closed */
-      /* 🔥 FIX: Apple-style spring animation */
+      box-shadow: 0 0 0 rgba(0,0,0,0); /* ðŸ”¥ FIX: No shadow when closed */
+      /* ðŸ”¥ FIX: Apple-style spring animation */
       transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.5s ease, opacity 0.5s ease;
   } 
   .sidebar.open { 
       transform: translateX(0); 
       opacity: 1; 
       pointer-events: auto; 
-      box-shadow: 15px 0 40px rgba(0,0,0,0.4); /* 🔥 FIX: Shadow only applies when open */
+      box-shadow: 15px 0 40px rgba(0,0,0,0.4); /* ðŸ”¥ FIX: Shadow only applies when open */
   }
   
   .mobile-close-btn { 
@@ -1790,7 +1790,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
   .mobile-action-row button { flex: 1; padding: 12px 10px !important; font-size: 11px !important; justify-content: center; }
 
  /* =======================================================
-     🍏 PREMIUM iOS SEPARATED PILL & FLOATING FAB ENGINE
+     ðŸ PREMIUM iOS SEPARATED PILL & FLOATING FAB ENGINE
      ======================================================= */
   .sidebar { display: none !important; } 
   .top-bar .brandRow button { display: none !important; } 
@@ -1845,7 +1845,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
       transition: 0.3s ease; stroke: currentColor !important; margin: 0 !important; 
   }
   
-  /* 🔥 THE NEW FULL-AREA ACTIVE HIGHLIGHT */
+  /* ðŸ”¥ THE NEW FULL-AREA ACTIVE HIGHLIGHT */
   .nav-tab.active { 
       background: rgba(255, 255, 255, 0.1) !important; /* Highlights the whole button */
       color: var(--brand) !important; 
@@ -1962,7 +1962,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
 .search-icon { 
     position: absolute; 
     left: 16px; 
-    /* 🔥 THE FIX: Absolute margin-auto centering creates a flawless, dedicated physical space */
+    /* ðŸ”¥ THE FIX: Absolute margin-auto centering creates a flawless, dedicated physical space */
     top: 0; 
     bottom: 0; 
     margin: auto; 
@@ -1974,7 +1974,7 @@ td { padding: 15px; border-bottom: 1px solid var(--border); font-weight: 600; ve
     z-index: 2;
 }
 
-/* 🔥 Added input[type="text"] to beat the global CSS rules */
+/* ðŸ”¥ Added input[type="text"] to beat the global CSS rules */
 input[type="text"].search-input { 
     width: 100%; 
     background: rgba(255, 255, 255, 0.03); 
@@ -1983,7 +1983,7 @@ input[type="text"].search-input {
     border: 1px solid rgba(255, 255, 255, 0.1); 
     border-radius: var(--radius-pill); 
     
-    /* 🔥 FORCED padding-left so the text clears the icon perfectly */
+    /* ðŸ”¥ FORCED padding-left so the text clears the icon perfectly */
     padding: 12px 20px 12px 44px !important; 
     
     color: white; 
@@ -2036,7 +2036,7 @@ mark.highlight-match {
 }
 
 /* =======================================================
-   📋 ADMIN PIPELINE: TRACKING & ACTION BUTTONS
+   ðŸ“‹ ADMIN PIPELINE: TRACKING & ACTION BUTTONS
    ======================================================= */
 .btn-action-download {
     background: rgba(46, 204, 113, 0.1);
@@ -2217,5 +2217,6 @@ h1, h2, h3, .premium-sticky-header h2, .panel h2, .glass-title-pill h3 {
 
 
 
-@ m e d i a   ( m i n - w i d t h :   9 5 1 p x )   {   # m o b i l e - n a v - b a r   {   d i s p l a y :   n o n e   ! i m p o r t a n t ;   }   }  
- 
+@media (min-width: 951px) { #mobile-nav-bar { display: none !important; } }
+
+
