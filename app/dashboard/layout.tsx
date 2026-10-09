@@ -154,7 +154,7 @@ export default function DashboardLayout({
               </svg>
               <span className="notification-badge" style={{ display: "flex" }}>3</span>
               
-              <div className={`notif-dropdown ${isNotifOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(10, 15, 25, 0.75)" }} onClick={(e) => e.stopPropagation()}>
+              <div className={`notif-dropdown ${isNotifOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="notif-header">
                   <span>System Alerts</span>
                   <span style={{ fontSize: 10, color: "var(--brand)", cursor: "pointer" }}>Mark all read</span>
@@ -179,7 +179,7 @@ export default function DashboardLayout({
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </span>
               
-              <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(10, 15, 25, 0.75)" }} onClick={(e) => e.stopPropagation()}>
+              <div className={`profile-dropdown ${isProfileOpen ? "active" : ""}`} style={{ backdropFilter: "blur(40px) saturate(200%)", WebkitBackdropFilter: "blur(40px) saturate(200%)", backgroundColor: "rgba(255, 255, 255, 0.04)" }} onClick={(e) => e.stopPropagation()}>
                 <div className="dropdown-header">
                   <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>{profileData.user_name}</div>
                   <div className="dropdown-email">{profileData.user_email}</div>

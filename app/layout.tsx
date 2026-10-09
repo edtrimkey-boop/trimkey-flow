@@ -49,9 +49,13 @@ export default function RootLayout({
         
                 {/* CSS MINIFIER BYPASS: Force Liquid Glass Physics */}
         <style dangerouslySetInnerHTML={{ __html: `
-          .liquid-glass, .panel, .kpi-card, .premium-sticky-header, .glass-box, .nav-pill-box, .fab-action-sheet, .glass-overlay, .profile-dropdown, .notif-dropdown, .glass-title-pill, .tk-toast, .nav-tab.active {
+          .liquid-glass, .panel, .kpi-card, .premium-sticky-header, .glass-box, .nav-pill-box, .fab-action-sheet, .glass-overlay, .profile-dropdown, .notif-dropdown, .glass-title-pill, .tk-toast, .nav-tab.active, button {
             backdrop-filter: blur(40px) saturate(200%) !important;
             -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+          }
+          .user-profile-container, .notification-wrapper {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
           }
         ` }} />
         {/* TRUE LIQUID REFRACTION ENGINE */}
