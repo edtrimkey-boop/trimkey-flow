@@ -30,7 +30,7 @@ export default function GlassDiagnostic() {
         const computed = getComputedStyle(dropdown);
         console.error(`\n[Checking Element]:`, dropdown.className);
         console.error(" - Computed backdrop-filter:", computed.backdropFilter);
-        console.error(" - Computed -webkit-backdrop-filter:", computed.webkitBackdropFilter);
+        console.error(" - Computed -webkit-backdrop-filter:", computed.getPropertyValue('-webkit-backdrop-filter'));
         console.error(" - Computed background color:", computed.backgroundColor);
         
         // 3. Check for Stacking Context / Backdrop-Filter blockers in Parents
