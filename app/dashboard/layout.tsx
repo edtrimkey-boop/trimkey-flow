@@ -103,7 +103,7 @@ export default function DashboardLayout({
         {/* Navigation Links */}
         <div className="flex-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
+            const isActive = item.path === "/dashboard" ? pathname === "/dashboard" : (pathname === item.path || pathname.startsWith(`${item.path}/`));
             return (
               <Link prefetch={true} href={item.path} key={item.path} className={`nav-item ${isActive ? "active" : ""}`}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 0 }}>
@@ -232,7 +232,7 @@ export default function DashboardLayout({
       </div>
 
       {/* ================= MOBILE BOTTOM NAV (APPLE STYLE) ================= */}
-      <div id="mobile-nav-bar" className="flex md:hidden">
+      <div id="mobile-nav-bar">
         <div className="nav-pill-box">
           <Link prefetch={true} href="/dashboard" className={`nav-tab ${pathname === '/dashboard' ? 'active' : ''}`}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>
