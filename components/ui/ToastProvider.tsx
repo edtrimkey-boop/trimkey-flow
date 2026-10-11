@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { playSound } from '@/lib/audioEngine'
 
-export type ToastType = 'success' | 'error' | 'info'
+export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
 interface SystemMessageContextType {
   showToast: (message: string, type?: ToastType) => void
@@ -23,6 +23,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
     if (msgType === 'success') playSound('success');
     else if (msgType === 'error') playSound('error');
+    else if (msgType === 'warning') playSound('warning');
     else playSound('notification');
 
     setTimeout(() => {
@@ -36,11 +37,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     ? <svg className="anim-icon" viewBox="0 0 52 52" style={{ stroke: 'var(--success)', fill: 'none' }}><circle className="anim-circle" cx="26" cy="26" r="25" /><path className="anim-check" d="M14.1 27.2l7.1 7.2 16.7-16.8" /></svg>
     : type === 'error'
     ? <svg className="anim-icon" viewBox="0 0 52 52" style={{ stroke: 'var(--danger)', fill: 'none' }}><circle className="anim-circle" cx="26" cy="26" r="25" /><path className="anim-cross1" d="M16 16 36 36" /><path className="anim-cross2" d="M36 16 16 36" /></svg>
+    : type === 'warning'
+    ? <svg className="anim-icon" viewBox="0 0 52 52" style={{ stroke: 'var(--warning)', fill: 'none' }}><circle className="anim-circle" cx="26" cy="26" r="25" /><line x1="26" y1="16" x2="26" y2="28" strokeWidth="3" strokeLinecap="round" /><circle cx="26" cy="36" r="2" fill="var(--warning)" strokeWidth="0" /></svg>
     : <svg className="anim-icon" viewBox="0 0 52 52" style={{ stroke: 'var(--brand)', fill: 'none' }}><circle className="anim-circle" cx="26" cy="26" r="25" /><path className="anim-check" d="M26 16v12" /><circle className="anim-cross1" cx="26" cy="36" r="1" fill="currentColor" strokeWidth="0" /></svg>
-    
 
-  const titleColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--brand)'
-  const titleText = type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'System Notice'
+  const titleColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : type === 'warning' ? 'var(--warning)' : 'var(--brand)'
+  const titleText = type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'System Notice'
 
   return (
     <SystemMessageContext.Provider value={{ showToast }}>
