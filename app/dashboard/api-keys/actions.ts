@@ -3,6 +3,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generateApiKey } from '@/lib/api-key'
+import { revalidatePath } from 'next/cache'
 
 export async function getApplicationsAction() {
   const db = createAdminClient()
@@ -56,13 +57,17 @@ export async function revokeKeyAction(keyId: string) {
   const db = createAdminClient()
   const { error } = await db
     .from('api_keys')
-    .update({ status: 'revoked' })
+    .update({ 
+      status: 'revoked',
+      revoked_at: new Date().toISOString()
+    })
     .eq('id', keyId)
 
   if (error) {
     console.error('Supabase Error:', error)
-    throw new Error('Failed to revoke API key')
+    throw new Error('Failed to revoke API key: ' + error.message)
   }
 
+  revalidatePath('/dashboard/api-keys')
   return { success: true }
 }

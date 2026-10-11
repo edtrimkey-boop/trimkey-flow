@@ -24,3 +24,57 @@ export async function addApplicationAction(orgId: string, name: string, environm
   revalidatePath('/dashboard/webhooks')
   revalidatePath('/dashboard/domains')
 }
+
+export async function updateApplicationAction(
+  appId: string,
+  data: {
+    name: string
+    environment: string
+    status: string
+    webhook_url?: string
+  }
+) {
+  const db = createAdminClient()
+
+  const { error } = await db
+    .from('applications')
+    .update({
+      name: data.name,
+      environment: data.environment,
+      status: data.status,
+      webhook_url: data.webhook_url || null,
+      updated_at: new Date().toISOString(),
+    } as any)
+    .eq('id', appId)
+
+  if (error) {
+    console.error('Update App Error:', error)
+    throw new Error('Failed to update application: ' + error.message)
+  }
+
+  revalidatePath('/dashboard/applications')
+  revalidatePath('/dashboard/api-keys')
+  revalidatePath('/dashboard/webhooks')
+  revalidatePath('/dashboard/domains')
+  return { success: true }
+}
+
+export async function deleteApplicationAction(appId: string) {
+  const db = createAdminClient()
+
+  const { error } = await db
+    .from('applications')
+    .delete()
+    .eq('id', appId)
+
+  if (error) {
+    console.error('Delete App Error:', error)
+    throw new Error('Failed to delete application: ' + error.message)
+  }
+
+  revalidatePath('/dashboard/applications')
+  revalidatePath('/dashboard/api-keys')
+  revalidatePath('/dashboard/webhooks')
+  revalidatePath('/dashboard/domains')
+  return { success: true }
+}

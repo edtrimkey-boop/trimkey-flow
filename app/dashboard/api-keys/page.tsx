@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
-import { generateNewKeyAction, getExistingKeysAction, getApplicationsAction } from './actions'
+import { generateNewKeyAction, getExistingKeysAction, getApplicationsAction, revokeKeyAction } from './actions'
 import { DomainManager } from './DomainManager'
 import { useToast } from '@/components/ui/ToastProvider'
 import { GenerateKeyModal } from './GenerateKeyModal'
@@ -12,11 +12,36 @@ export default function ApiKeysPage() {
   const [applications, setApplications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [revokingId, setRevokingId] = useState<string | null>(null)
   const [revealStates, setRevealStates] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     loadData()
   }, [])
+
+  async function handleRevoke(keyId: string, appName: string) {
+    if (!confirm(`Are you sure you want to revoke this API key for "${appName}"? Any systems currently using this key will immediately be blocked.`)) {
+      return
+    }
+
+    setRevokingId(keyId)
+    try {
+      await revokeKeyAction(keyId)
+      setKeys((prev) =>
+        prev.map((k) =>
+          k.id === keyId
+            ? { ...k, status: 'revoked', revoked_at: new Date().toISOString() }
+            : k
+        )
+      )
+      showToast('API key revoked successfully', 'success')
+    } catch (err: any) {
+      console.error(err)
+      showToast(err.message || 'Failed to revoke API key', 'error')
+    } finally {
+      setRevokingId(null)
+    }
+  }
 
   async function loadData() {
     setLoading(true)
@@ -168,9 +193,34 @@ export default function ApiKeysPage() {
                         </span>
                       </td>
                       <td>
-                         <button style={{ background: 'transparent', color: 'var(--danger)', border: '1px solid var(--danger)', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
-                           Revoke
-                         </button>
+                        {k.status === 'revoked' ? (
+                          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, padding: '4px 8px', display: 'inline-block' }}>
+                            Revoked
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleRevoke(k.id, k.applications?.name || 'this app')}
+                            disabled={revokingId === k.id}
+                            className="liquid-glass"
+                            style={{
+                              color: 'var(--danger)',
+                              borderColor: 'rgba(239, 68, 68, 0.4)',
+                              padding: '5px 12px',
+                              fontSize: '11px',
+                              fontWeight: 800,
+                              cursor: revokingId === k.id ? 'not-allowed' : 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                            </svg>
+                            {revokingId === k.id ? 'Revoking...' : 'Revoke'}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   )

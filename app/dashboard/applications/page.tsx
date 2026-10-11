@@ -75,9 +75,7 @@ export default async function ApplicationsPage() {
                     {app.application_domains?.[0]?.count ?? 0}
                   </td>
                   <td>
-                    <button className="flat-pill" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', fontSize: '11px', padding: '4px 12px' }}>
-                      Manage
-                    </button>
+                    <ManageAppButton app={app} />
                   </td>
                 </tr>
               ))
