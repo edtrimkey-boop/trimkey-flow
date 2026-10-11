@@ -1,4 +1,4 @@
-﻿/* globals.css â€” Trim Key Flow Design System */
+/* globals.css â€” Trim Key Flow Design System */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -127,7 +127,7 @@
     }
 }
 
-html, body { height: 100vh; width: 100vw; overflow: hidden; background: var(--bg); color: var(--text); display: flex; flex-direction: row; }
+html, body { min-height: 100%; width: 100%; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
 ::-webkit-scrollbar { width: 6px; height: 6px; } 
 ::-webkit-scrollbar-thumb { background: var(--card-light); border-radius: 10px; } 
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1125,7 +1125,7 @@ h1, h2, h3, .premium-sticky-header h2, .panel h2, .glass-title-pill h3 {
     }
 }
 
-html, body { height: 100vh; width: 100vw; overflow: hidden; background: var(--bg); color: var(--text); display: flex; flex-direction: row; }
+html, body { min-height: 100%; width: 100%; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
 ::-webkit-scrollbar { width: 6px; height: 6px; } 
 ::-webkit-scrollbar-thumb { background: var(--card-light); border-radius: 10px; } 
 ::-webkit-scrollbar-track { background: transparent; }

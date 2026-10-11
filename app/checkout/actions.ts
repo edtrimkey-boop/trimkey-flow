@@ -15,14 +15,21 @@ export async function getCheckoutData(paymentNumber: string) {
       amount, 
       currency_code,
       merchant_id,
-      order_id
+      order_id,
+      status,
+      paid_at,
+      provider_payment_id
     `)
     .eq('payment_number', paymentNumber)
     .single()
 
   if (error || !payment) throw new Error('Payment not found')
 
-  const { data: order } = await db.from('orders').select('provider_order_id').eq('id', payment.order_id).single()
+  const { data: order } = await db
+    .from('orders')
+    .select('provider_order_id, purpose, customer_name')
+    .eq('id', payment.order_id)
+    .single()
   const { data: merchant } = await db.from('merchants').select('name').eq('id', payment.merchant_id).single()
 
   let keyId = process.env.RAZORPAY_KEY_ID || 'dummy'
@@ -48,6 +55,11 @@ export async function getCheckoutData(paymentNumber: string) {
     currency: payment.currency_code,
     merchant_name: merchant?.name || 'Merchant',
     provider_order_id: order?.provider_order_id,
+    purpose: order?.purpose || 'Order Checkout',
+    customer_name: order?.customer_name,
+    status: payment.status,
+    paid_at: payment.paid_at,
+    provider_payment_id: payment.provider_payment_id,
     key_id: keyId
   }
 }
