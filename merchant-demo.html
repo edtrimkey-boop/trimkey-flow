@@ -22,7 +22,7 @@
         <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" alt="Red Nike Sneaker">
         <h1>Nike Air Max 2026</h1>
         <p>Experience the next generation of comfort and style.</p>
-        <div class="price">₹1,500</div>
+        <div class="price">₹1</div>
         
         <button id="buy-btn" onclick="startCheckout()">Buy Now with Trim Key</button>
     </div>
@@ -31,7 +31,7 @@
         // NOTE TO MERCHANT: In production, this API call should happen on your BACKEND
         // so your Secret API Key is never exposed in the browser!
         
-        const TRIM_KEY_API_KEY = "tk_live_782ef46e1143ad0ae00a8bc461466ffcbf06365425f30137e148ab076fd8fdb7"; 
+        const TRIM_KEY_API_KEY = "tk_live_0cc6de80a27a46ea7c5823ffa71cb7f15ad891bc9a21cc7ef2c2f6186bc4fa7d"; 
 
         async function startCheckout() {
             const btn = document.getElementById('buy-btn');
@@ -49,7 +49,7 @@
                         action: "payment.create",
                         data: {
                             merchant_id: "671a032d-b500-475a-b432-69b058c1a0d9n", // The test merchant we created
-                            amount: 150000, // Amount in paise (1500.00 INR)
+                            amount: 1, // Amount in paise (1500.00 INR)
                             currency: "INR",
                             purpose: "Nike Air Max 2026",
                             customer: {

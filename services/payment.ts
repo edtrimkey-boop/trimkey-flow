@@ -165,7 +165,7 @@ function buildCheckoutInfo(
       : (process.env.RAZORPAY_KEY_ID ?? '')
 
   return {
-    checkout_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/checkout/${payment.payment_number}`,
+    checkout_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.FLOW_API_BASE_URL || 'https://flow.trimkey.in'}/checkout/${payment.payment_number}`,
     payment_id: payment.id,
     payment_number: payment.payment_number,
     order_id: order.id,

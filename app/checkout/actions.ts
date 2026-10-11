@@ -25,12 +25,30 @@ export async function getCheckoutData(paymentNumber: string) {
   const { data: order } = await db.from('orders').select('provider_order_id').eq('id', payment.order_id).single()
   const { data: merchant } = await db.from('merchants').select('name').eq('id', payment.merchant_id).single()
 
+  let keyId = process.env.RAZORPAY_KEY_ID || 'dummy'
+  const { data: providerRec } = await db
+    .from('merchant_providers')
+    .select('credentials_encrypted')
+    .eq('merchant_id', payment.merchant_id)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (providerRec?.credentials_encrypted) {
+    try {
+      const decrypted = await decrypt(providerRec.credentials_encrypted as EncryptedCredentials)
+      const parsed = JSON.parse(decrypted)
+      if (parsed.key_id) keyId = parsed.key_id
+    } catch {
+      // fallback to process.env.RAZORPAY_KEY_ID
+    }
+  }
+
   return {
     amount: payment.amount,
     currency: payment.currency_code,
     merchant_name: merchant?.name || 'Merchant',
     provider_order_id: order?.provider_order_id,
-    key_id: process.env.RAZORPAY_KEY_ID || 'dummy'
+    key_id: keyId
   }
 }
 

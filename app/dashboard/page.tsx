@@ -198,7 +198,22 @@ async function RecentPayments() {
                 ) : (
                    payments.map((p: any) => (
                       <tr key={p.payment_number} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: '0.2s ease' }}>
-                         <td style={{ padding: '15px 20px', fontFamily: 'monospace', color: 'var(--brand)', fontSize: '13px' }}>{p.payment_number}</td>
+                         <td style={{ padding: '15px 20px', fontFamily: 'monospace', fontSize: '13px' }}>
+                            <Link
+                               href={`/checkout/${p.payment_number}`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               title="Open Checkout Page"
+                               style={{ color: 'var(--brand)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            >
+                               <span>{p.payment_number}</span>
+                               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.65 }}>
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                               </svg>
+                            </Link>
+                         </td>
                          <td style={{ padding: '15px 20px', color: 'white', fontWeight: 600, fontSize: '13px' }}>{p.merchants?.name || 'Default Merchant'}</td>
                          <td style={{ padding: '15px 20px', fontWeight: 900, color: 'white', fontSize: '14px' }}>₹{(p.amount / 100).toFixed(2)}</td>
                          <td style={{ padding: '15px 20px' }}><StatusBadge status={p.status} /></td>

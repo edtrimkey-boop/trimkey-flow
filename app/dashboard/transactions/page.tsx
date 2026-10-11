@@ -1,6 +1,7 @@
-﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link';
 import ExportButton from './ExportButton';
+import CreatePaymentModal from './CreatePaymentModal';
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -40,7 +41,16 @@ export default async function TransactionsPage({
 
   if (params.status) query = query.eq('status', params.status)
 
-  const { data: payments, count } = await query
+  const [paymentsRes, appsRes, merchantsRes] = await Promise.all([
+    query,
+    db.from('applications').select('id, name').order('name', { ascending: true }),
+    db.from('merchants').select('id, name, status').eq('status', 'active').order('name', { ascending: true }),
+  ])
+
+  const payments = paymentsRes.data
+  const count = paymentsRes.count
+  const applications = appsRes.data || []
+  const merchants = merchantsRes.data || []
 
   const statuses = ['SUCCESS', 'FAILED', 'PENDING', 'PROCESSING', 'REFUNDED', 'PARTIALLY_REFUNDED']
 
@@ -53,7 +63,8 @@ export default async function TransactionsPage({
               Real-time audit log of all payment authorizations and settlement records ({count ?? 0} total)
            </p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+           <CreatePaymentModal applications={applications} merchants={merchants} />
            <ExportButton data={payments || []} />
         </div>
       </div>
@@ -105,8 +116,28 @@ export default async function TransactionsPage({
             ) : (
               (payments ?? []).map((p: any) => (
                 <tr key={p.payment_number}>
-                  <td style={{ fontFamily: 'monospace', color: 'var(--brand)' }}>
-                    {p.payment_number}
+                  <td style={{ fontFamily: 'monospace' }}>
+                    <Link
+                      href={`/checkout/${p.payment_number}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Open Checkout Page"
+                      style={{
+                        color: 'var(--brand)',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <span>{p.payment_number}</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.65 }}>
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </Link>
                   </td>
                   <td>
                     {p.applications?.name ?? '—'}

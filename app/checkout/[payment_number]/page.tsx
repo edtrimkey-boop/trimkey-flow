@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import Script from 'next/script'
 import { Logo } from '@/components/ui/logo'
 
 export default function CheckoutPage() {
@@ -84,6 +85,12 @@ export default function CheckoutPage() {
           }
         }
     
+        if (typeof (window as any).Razorpay !== 'function') {
+          setError('Payment gateway SDK is still loading or blocked. Please check your connection and refresh.')
+          setProcessing(false)
+          return
+        }
+
         const rzp1 = new (window as any).Razorpay(options)
         rzp1.open()
         
@@ -138,7 +145,7 @@ export default function CheckoutPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a1911', padding: '20px' }}>
        {/* Inject Razorpay Script */}
-       <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
        <div className="panel" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 30px', position: 'relative', overflow: 'hidden' }}>
           
