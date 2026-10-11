@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
+import { ModalPortal } from '@/components/ui/ModalPortal'
 import { updateApplicationAction, deleteApplicationAction } from './actions'
 
 export function ManageAppButton({ app }: { app: any }) {
@@ -83,153 +84,138 @@ export function ManageAppButton({ app }: { app: any }) {
         Manage
       </button>
 
-      {isOpen && (
-        <div 
-          className="glass-overlay active" 
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
-          onClick={() => !isPending && !isDeleting && setIsOpen(false)}
-        >
-          <div 
-            className="glass-box" 
-            style={{ 
-              width: '460px', 
-              maxWidth: '92%', 
-              padding: '28px',
-              backgroundColor: 'rgba(10, 15, 25, 0.92)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 15px 50px rgba(0, 0, 0, 0.7)'
-            }}
-            onClick={(e) => e.stopPropagation()}
+      <ModalPortal 
+        isOpen={isOpen} 
+        onClose={() => !isPending && !isDeleting && setIsOpen(false)}
+        maxWidth="480px"
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '16px', color: 'white', fontWeight: 800 }}>Manage Application</h3>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>ID: {app.id}</span>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setIsOpen(false)} 
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '16px', color: 'white', fontWeight: 800 }}>Manage Application</h3>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>ID: {app.id}</span>
-              </div>
-              <button 
-                type="button"
-                onClick={() => setIsOpen(false)} 
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
+              Application Name
+            </label>
+            <input 
+              type="text" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="tk-input" 
+              style={{ width: '100%' }}
+              placeholder="e.g. Production Web App"
+              required 
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
+                Environment
+              </label>
+              <select 
+                className="tk-input" 
+                style={{ width: '100%' }}
+                value={environment}
+                onChange={(e) => setEnvironment(e.target.value)}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
+                <option value="live">Live (Production)</option>
+                <option value="test">Test (Sandbox)</option>
+              </select>
             </div>
 
-            <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
-                  Application Name
-                </label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="tk-input" 
-                  style={{ width: '100%' }}
-                  placeholder="e.g. Production Web App"
-                  required 
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
-                    Environment
-                  </label>
-                  <select 
-                    className="tk-input" 
-                    style={{ width: '100%' }}
-                    value={environment}
-                    onChange={(e) => setEnvironment(e.target.value)}
-                  >
-                    <option value="live">Live (Production)</option>
-                    <option value="test">Test (Sandbox)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
-                    Status
-                  </label>
-                  <select 
-                    className="tk-input" 
-                    style={{ width: '100%' }}
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                  >
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
-                  Webhook URL (Optional)
-                </label>
-                <input 
-                  type="url" 
-                  value={webhookUrl}
-                  onChange={(e) => setWebhookUrl(e.target.value)}
-                  className="tk-input" 
-                  style={{ width: '100%' }}
-                  placeholder="https://yourdomain.com/api/webhooks"
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '15px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                <button 
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={isDeleting || isPending}
-                  className="liquid-glass"
-                  style={{ 
-                    padding: '8px 14px', 
-                    fontSize: '12px', 
-                    fontWeight: 700, 
-                    color: 'var(--danger)', 
-                    borderColor: 'rgba(239, 68, 68, 0.3)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete App'}
-                </button>
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsOpen(false)}
-                    disabled={isPending || isDeleting}
-                    className="liquid-glass"
-                    style={{ padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={isPending || isDeleting}
-                    className="liquid-glass"
-                    style={{ 
-                      padding: '8px 18px', 
-                      fontSize: '12px', 
-                      fontWeight: 800, 
-                      color: 'var(--brand)', 
-                      borderColor: 'var(--brand)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {isPending ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
-            </form>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
+                Status
+              </label>
+              <select 
+                className="tk-input" 
+                style={{ width: '100%' }}
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>
+              Webhook URL (Optional)
+            </label>
+            <input 
+              type="url" 
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+              className="tk-input" 
+              style={{ width: '100%' }}
+              placeholder="https://yourdomain.com/api/webhooks"
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '15px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <button 
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting || isPending}
+              className="liquid-glass"
+              style={{ 
+                padding: '8px 14px', 
+                fontSize: '12px', 
+                fontWeight: 700, 
+                color: 'var(--danger)', 
+                borderColor: 'rgba(239, 68, 68, 0.3)',
+                cursor: 'pointer'
+              }}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete App'}
+            </button>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsOpen(false)}
+                disabled={isPending || isDeleting}
+                className="liquid-glass"
+                style={{ padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={isPending || isDeleting}
+                className="liquid-glass"
+                style={{ 
+                  padding: '8px 18px', 
+                  fontSize: '12px', 
+                  fontWeight: 800, 
+                  color: 'var(--brand)', 
+                  borderColor: 'var(--brand)',
+                  cursor: 'pointer'
+                }}
+              >
+                {isPending ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </ModalPortal>
     </>
   )
 }

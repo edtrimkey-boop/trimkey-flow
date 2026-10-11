@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 import { useToast } from '@/components/ui/ToastProvider'
+import { ModalPortal } from '@/components/ui/ModalPortal'
 import { addDomainAction } from './actions'
 
 export function AddDomainButton({ applications }: { applications: any[] }) {
@@ -42,50 +43,51 @@ export function AddDomainButton({ applications }: { applications: any[] }) {
         Add Domain
       </button>
 
-      {isOpen && (
-        <div className="glass-overlay active" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-box" style={{ width: '400px', maxWidth: '90%', padding: '25px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h3>Add New Domain</h3>
-              <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', color: 'var(--text-muted)' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', marginBottom: '5px' }}>Application</label>
-                <select 
-                  className="tk-input" 
-                  style={{ width: '100%' }}
-                  value={appId}
-                  onChange={(e) => setAppId(e.target.value)}
-                  required
-                >
-                  {applications.map(app => (
-                    <option key={app.id} value={app.id}>{app.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', marginBottom: '5px' }}>Domain (e.g. example.com)</label>
-                <input 
-                  type="text" 
-                  value={domain}
-                  onChange={(e) => setDomain(e.target.value)}
-                  className="tk-input" 
-                  style={{ width: '100%' }} 
-                  required 
-                />
-              </div>
-              <button disabled={isPending} type="submit" className="liquid-glass" style={{ padding: '10px', fontWeight: 800, marginTop: '10px' }}>
-                {isPending ? 'Adding...' : 'Add Domain'}
-              </button>
-            </form>
-          </div>
+      <ModalPortal isOpen={isOpen} onClose={() => !isPending && setIsOpen(false)} maxWidth="420px">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0, fontSize: '16px', color: 'white', fontWeight: 800 }}>Add New Domain</h3>
+          <button 
+            type="button"
+            onClick={() => setIsOpen(false)} 
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
-      )}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>Application</label>
+            <select 
+              className="tk-input" 
+              style={{ width: '100%' }}
+              value={appId}
+              onChange={(e) => setAppId(e.target.value)}
+              required
+            >
+              {applications.map(app => (
+                <option key={app.id} value={app.id}>{app.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--text)' }}>Domain (e.g. example.com)</label>
+            <input 
+              type="text" 
+              value={domain}
+              onChange={(e) => setDomain(e.target.value)}
+              className="tk-input" 
+              style={{ width: '100%' }} 
+              placeholder="example.com"
+              required 
+            />
+          </div>
+          <button disabled={isPending} type="submit" className="liquid-glass" style={{ padding: '12px', fontWeight: 800, marginTop: '10px', cursor: isPending ? 'not-allowed' : 'pointer' }}>
+            {isPending ? 'Adding...' : 'Add Domain'}
+          </button>
+        </form>
+      </ModalPortal>
     </>
   )
 }

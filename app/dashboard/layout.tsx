@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { logoutAction } from "@/app/login/actions";
 
 
 export default function DashboardLayout({
@@ -18,7 +20,50 @@ export default function DashboardLayout({
   const [isNotifOpen, setNotifOpen] = useState(false);
   const [isFabOpen, setFabOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const previousPathname = useRef(pathname);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      // Invalidate server session
+      await logoutAction().catch(() => {});
+      // Invalidate client supabase session
+      const supabase = createClient();
+      await supabase.auth.signOut().catch(() => {});
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      try {
+        // Clear all persistent and session caches
+        localStorage.clear();
+        sessionStorage.clear();
+
+        if (typeof window !== 'undefined' && 'caches' in window) {
+          const cacheKeys = await window.caches.keys();
+          await Promise.all(cacheKeys.map((k) => window.caches.delete(k)));
+        }
+
+        // Expire all cookies across domains
+        if (typeof document !== 'undefined') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i];
+            const eqPos = cookie.indexOf('=');
+            const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+            if (name) {
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};`;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname};`;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Cache clear error:', e);
+      }
+      window.location.href = '/login';
+    }
+  };
 
   const [profileData, setProfileData] = useState({
     user_name: 'Admin User',
@@ -205,9 +250,14 @@ export default function DashboardLayout({
 
                 <hr style={{ border: 0, borderBottom: "1px solid rgba(255,255,255,0.08)", margin: "12px 0" }} />
                 
-                <button className="logout-btn border-danger/20 bg-danger/5 text-danger hover:bg-gradient-to-br hover:from-danger hover:to-[#B91C1C] hover:text-white">
+                <button 
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="logout-btn border-danger/20 bg-danger/5 text-danger hover:bg-gradient-to-br hover:from-danger hover:to-[#B91C1C] hover:text-white"
+                  style={{ opacity: isLoggingOut ? 0.6 : 1, cursor: isLoggingOut ? 'wait' : 'pointer' }}
+                >
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                  Secure Sign Out
+                  {isLoggingOut ? 'Signing Out...' : 'Secure Sign Out'}
                 </button>
               </div>
             </div>

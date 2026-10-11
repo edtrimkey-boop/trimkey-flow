@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createPaymentLinkAction } from './actions'
 import { useToast } from '@/components/ui/ToastProvider'
+import { ModalPortal } from '@/components/ui/ModalPortal'
 import type { CheckoutInfo } from '@/types/api'
 
 interface ApplicationOption {
@@ -176,37 +177,14 @@ export default function CreatePaymentModal({
         <span>Create Payment Link</span>
       </button>
 
-      {isOpen && (
-        <div
-          className="glass-overlay active"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(5, 8, 15, 0.82)',
-            backdropFilter: 'blur(12px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '20px',
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !loading) handleClose()
-          }}
-        >
-          <div
-            className="glass-box"
-            style={{
-              width: '480px',
-              maxWidth: '100%',
-              background: 'rgba(11, 17, 30, 0.95)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-            }}
-          >
-            {/* Header */}
+      <ModalPortal
+        isOpen={isOpen}
+        onClose={() => !loading && handleClose()}
+        maxWidth="480px"
+        padding={0}
+        boxStyle={{ overflow: 'hidden' }}
+      >
+        {/* Header */}
             <div
               style={{
                 background: 'rgba(15, 23, 42, 0.8)',
@@ -689,9 +667,7 @@ export default function CreatePaymentModal({
                 </div>
               </form>
             )}
-          </div>
-        </div>
-      )}
+      </ModalPortal>
     </>
   )
 }

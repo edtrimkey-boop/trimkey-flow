@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { playSound } from '@/lib/audioEngine'
+import { ModalPortal } from './ModalPortal'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -47,32 +48,28 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <SystemMessageContext.Provider value={{ showToast }}>
       {children}
-      {isOpen && (
-        <div id="customAlert" className="glass-overlay active" style={{ zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-box" style={{ maxWidth: '450px', width: '100%', padding: '40px', textAlign: 'left', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <div className="premium-sticky-header">
-              <h2 style={{ color: titleColor }}>
-                  {titleText}
-              </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <button type="button" className="close-minimal" onClick={closeMessage} style={{ position: 'relative', top: 0, right: 0 }}>&times;</button>
-              </div>
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '10px' }}>
-              <div style={{ marginBottom: '15px' }}>{icon}</div>
-              <p style={{ marginBottom: '25px', lineHeight: 1.6, color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
-                {message}
-              </p>
-            </div>
-            <button 
-              onClick={closeMessage} 
-              style={{ width: '100%', background: 'linear-gradient(135deg, var(--brand), #00c985)', color: '#000', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer' }}
-            >
-              Acknowledge
-            </button>
+      <ModalPortal isOpen={isOpen} onClose={closeMessage} maxWidth="450px" padding="36px">
+        <div className="premium-sticky-header">
+          <h2 style={{ color: titleColor, margin: 0, fontSize: '18px', fontWeight: 800 }}>
+            {titleText}
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button type="button" className="close-minimal" onClick={closeMessage} style={{ position: 'relative', top: 0, right: 0, cursor: 'pointer', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '20px' }}>&times;</button>
           </div>
         </div>
-      )}
+        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+          <div style={{ marginBottom: '15px' }}>{icon}</div>
+          <p style={{ marginBottom: '25px', lineHeight: 1.6, color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
+            {message}
+          </p>
+        </div>
+        <button 
+          onClick={closeMessage} 
+          style={{ width: '100%', background: 'linear-gradient(135deg, var(--brand), #00c985)', color: '#000', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer' }}
+        >
+          Acknowledge
+        </button>
+      </ModalPortal>
     </SystemMessageContext.Provider>
   )
 }

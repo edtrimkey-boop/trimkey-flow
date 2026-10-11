@@ -45,3 +45,13 @@ export async function magicLinkAction(email: string, redirectTo: string): Promis
 
   return { success: true }
 }
+
+export async function logoutAction(): Promise<{ error?: string }> {
+  try {
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    return {}
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to sign out' }
+  }
+}

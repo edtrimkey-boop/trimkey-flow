@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { ModalPortal } from '@/components/ui/ModalPortal'
 
 export function GenerateKeyModal({
   applications,
@@ -35,9 +36,13 @@ export function GenerateKeyModal({
         {isGenerating ? 'Generating...' : 'Generate New Key'}
       </button>
 
-      {isOpen && (
-        <div className="glass-overlay active" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-box" style={{ width: '420px', maxWidth: '90%', padding: 0, overflow: 'hidden' }}>
+      <ModalPortal 
+        isOpen={isOpen} 
+        onClose={() => !isGenerating && setIsOpen(false)} 
+        maxWidth="440px" 
+        padding={0} 
+        boxStyle={{ overflow: 'hidden' }}
+      >
             
             {/* Sticky Glass Header */}
             <div style={{ 
@@ -130,9 +135,8 @@ export function GenerateKeyModal({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </ModalPortal>
+
     </>
   )
 }
