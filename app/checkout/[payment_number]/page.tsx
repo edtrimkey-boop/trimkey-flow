@@ -12,6 +12,7 @@ export default function CheckoutPage() {
   const [paymentData, setPaymentData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
+  const [verifying, setVerifying] = useState(false)
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
@@ -29,11 +30,12 @@ export default function CheckoutPage() {
   function handlePay() {
     if (!paymentData) return
     setProcessing(true)
+    setError(null)
     
     // Simulate payment process delay
     setTimeout(() => {
         if (paymentData.provider_order_id?.startsWith('pi_stripe_')) {
-          console.log('Stripe Secure Checkout Initialized!\n\nOrder ID: ' + paymentData.provider_order_id + '\n\nIn a production environment, this would open Stripe Elements.')
+          console.log('Stripe Secure Checkout Initialized!\n\nOrder ID: ' + paymentData.provider_order_id)
           triggerSuccess()
           return
         }
@@ -46,13 +48,35 @@ export default function CheckoutPage() {
           name: paymentData.merchant_name,
           description: `Payment for Order ${paymentNumber}`,
           order_id: paymentData.provider_order_id,
-          handler: function (response: any) {
-            console.log(`Payment Successful! Razorpay Payment ID: ${response.razorpay_payment_id}`)
-            triggerSuccess()
+          handler: async function (response: any) {
+            console.log(`[Checkout]: Received gateway payment ${response.razorpay_payment_id}. Initiating server-side cryptographic verification...`)
+            setVerifying(true)
+            
+            try {
+              const { verifyCheckoutPayment } = await import('../actions')
+              await verifyCheckoutPayment({
+                paymentNumber,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+              setVerifying(false)
+              triggerSuccess()
+            } catch (verifErr: any) {
+              console.error('[Checkout Security Alert]: Verification failed', verifErr)
+              setVerifying(false)
+              setProcessing(false)
+              setError(verifErr.message || 'Cryptographic verification failed. Payment was not confirmed.')
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setProcessing(false)
+            }
           },
           prefill: {
-            name: 'Demo Customer',
-            email: 'demo@example.com',
+            name: 'Customer',
+            email: 'customer@example.com',
             contact: '9999999999'
           },
           theme: {
@@ -139,13 +163,13 @@ export default function CheckoutPage() {
                   <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 251, 166, 0.1)', marginBottom: '30px' }}>
                      <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Total Amount</p>
                      <h1 style={{ fontSize: '38px', color: 'var(--brand)', fontWeight: 900, margin: '10px 0', letterSpacing: '-1px' }}>
-                       {paymentData.currency === 'INR' ? '?' : '$'}{(parseFloat(paymentData.amount) / 100).toFixed(2)}
+                       {paymentData.currency === 'INR' ? '₹' : '$'}{(parseFloat(paymentData.amount) / 100).toFixed(2)}
                      </h1>
                      <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>TRX: {paymentNumber}</p>
                   </div>
         
-                  <button onClick={handlePay} disabled={processing} className="liquid-glass" style={{ width: '100%', padding: '16px', fontSize: '15px', fontWeight: 800, opacity: processing ? 0.7 : 1 }}>
-                     {processing ? 'Processing Securely...' : 'Pay with Trim Key'}
+                  <button onClick={handlePay} disabled={processing || verifying} className="liquid-glass" style={{ width: '100%', padding: '16px', fontSize: '15px', fontWeight: 800, opacity: (processing || verifying) ? 0.7 : 1 }}>
+                     {verifying ? 'Verifying Gateway Cryptography...' : processing ? 'Opening Gateway...' : 'Pay with Trim Key'}
                   </button>
         
                   <div style={{ marginTop: '25px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>

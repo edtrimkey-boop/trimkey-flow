@@ -43,3 +43,11 @@ The core aesthetic of this application is "Apple Liquid Glass".
   - Usage: `showToast('Message text', 'success' | 'error' | 'warning' | 'info')`
 - **Forms & Data Modals:** Management and creation dialogs must use our custom `.glass-box` and `.glass-overlay active` components with dark glass backgrounds (`rgba(10, 15, 25, 0.92)`), glossy borders, and `.liquid-glass` buttons.
 
+## 6. Real Money Movement & Payment Security (MANDATORY)
+1. **Timing-Safe Webhook Engine:** All webhook HMAC signatures must strictly be verified in constant time via `crypto.timingSafeEqual`. Never compare signatures with `===` or `!==`. No fallback default secrets (e.g. `'hello12345'`) are permitted.
+2. **Zero-Trust Client Checkout:** Never trust client-side callbacks (`handler(response)`) to mark payments as successful. The frontend must pass `razorpay_payment_id`, `razorpay_order_id`, and `razorpay_signature` to a server-side verification endpoint (`verifyCheckoutPaymentAction`) which verifies the cryptographic proof before fulfilling orders.
+3. **Amount & Currency Tamper Protection:** Incoming webhooks and checkout proofs must compare gateway charged amounts and currencies against the database order. Any mismatch must immediately trigger `FRAUD_AMOUNT_MISMATCH` and reject fulfillment.
+4. **Anti-Replay Idempotency:** Duplicate webhooks must be handled idempotently. If a payment is already in `SUCCESS`, duplicate gateway retries must safely acknowledge without re-firing merchant delivery webhooks.
+5. **Memory-Safe Security & Headers:** Keep rate limit storage pruned against memory leaks on serverless cold starts. Enforce `X-Content-Type-Options: nosniff` and `Strict-Transport-Security` headers across public endpoints.
+
+
