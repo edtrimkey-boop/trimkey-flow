@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react'
 import { generateNewKeyAction, getExistingKeysAction, getApplicationsAction, revokeKeyAction } from './actions'
 import { DomainManager } from './DomainManager'
 import { useToast } from '@/components/ui/ToastProvider'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 import { GenerateKeyModal } from './GenerateKeyModal'
 
 export default function ApiKeysPage() {
   const { showToast } = useToast()
+  const { confirm } = useConfirm()
   const [keys, setKeys] = useState<any[]>([])
   const [applications, setApplications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -20,9 +22,8 @@ export default function ApiKeysPage() {
   }, [])
 
   async function handleRevoke(keyId: string, appName: string) {
-    if (!confirm(`Are you sure you want to revoke this API key for "${appName}"? Any systems currently using this key will immediately be blocked.`)) {
-      return
-    }
+    const ok = await confirm(`Are you sure you want to revoke this API key for "${appName}"? Any systems currently using this key will immediately be blocked.`)
+    if (!ok) return
 
     setRevokingId(keyId)
     try {

@@ -1,4 +1,4 @@
-﻿---
+---
 name: trimkey-developer
 description: Strict design system, CSS rules, Apple Liquid Glass physics, and Next.js architecture guidelines for Trim Key Flow.
 ---
@@ -31,6 +31,15 @@ The core aesthetic of this application is "Apple Liquid Glass".
   - Navigation relies entirely on the floating Apple-style pill (#mobile-nav-bar) anchored to the bottom of the screen.
 
 ## 4. Next.js Architecture & Performance
-- **Client Router Caching:** To prevent loading.tsx spinners from ruining the SPA feel when switching tabs, we use experimental.staleTimes: { dynamic: 300 } in 
-ext.config.ts. This caches server payloads in the browser for 5 minutes.
+- **Client Router Caching:** To prevent loading.tsx spinners from ruining the SPA feel when switching tabs, we use experimental.staleTimes: { dynamic: 300 } in next.config.ts. This caches server payloads in the browser for 5 minutes.
 - **Data Architecture:** Multi-tenant setup. Only merchant entities are global. All other data, rules, and configurations belong to specific merchants.
+
+## 5. Custom Alerts, Modals & Toast Messages (STRICT ZERO BROWSER NATIVE DIALOGS)
+- **Zero Native Browser Dialogs:** NEVER use `window.alert()`, `window.confirm()`, or `window.prompt()`. They break the native app feel and look unprofessional.
+- **Confirmations:** All destructive or critical user action confirmations must strictly use `const { confirm } = useConfirm()` from `@/components/ui/ConfirmProvider`.
+  - Usage: `const ok = await confirm('Your confirmation message here'); if (!ok) return;`
+  - It renders our custom Apple Glass floating confirmation modal with audio feedback.
+- **Notifications & Alerts:** All system feedback, success messages, warnings, and errors must strictly use `const { showToast } = useToast()` from `@/components/ui/ToastProvider`.
+  - Usage: `showToast('Message text', 'success' | 'error' | 'warning' | 'info')`
+- **Forms & Data Modals:** Management and creation dialogs must use our custom `.glass-box` and `.glass-overlay active` components with dark glass backgrounds (`rgba(10, 15, 25, 0.92)`), glossy borders, and `.liquid-glass` buttons.
+

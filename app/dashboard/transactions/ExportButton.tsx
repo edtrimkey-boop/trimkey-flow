@@ -1,11 +1,14 @@
 'use client'
 
 import React from 'react'
+import { useToast } from '@/components/ui/ToastProvider'
 
 export default function ExportButton({ data }: { data: any[] }) {
+  const { showToast } = useToast()
+
   const handleExportCSV = () => {
     if (!data || data.length === 0) {
-      alert('No data to export')
+      showToast('No transaction data to export', 'warning')
       return
     }
 
@@ -32,12 +35,13 @@ export default function ExportButton({ data }: { data: any[] }) {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      showToast('Transactions CSV exported', 'success')
     }
   }
 
   const handleExportPDF = async () => {
     if (!data || data.length === 0) {
-      alert('No data to export')
+      showToast('No transaction data to export', 'warning')
       return
     }
     

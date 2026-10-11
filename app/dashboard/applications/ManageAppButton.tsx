@@ -3,11 +3,13 @@
 import React, { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/ToastProvider'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 import { updateApplicationAction, deleteApplicationAction } from './actions'
 
 export function ManageAppButton({ app }: { app: any }) {
   const router = useRouter()
   const { showToast } = useToast()
+  const { confirm } = useConfirm()
   const [isOpen, setIsOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [isDeleting, setIsDeleting] = useState(false)
@@ -37,9 +39,8 @@ export function ManageAppButton({ app }: { app: any }) {
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${app.name}"? This action cannot be undone and will delete associated API keys and domains.`)) {
-      return
-    }
+    const ok = await confirm(`Are you sure you want to delete "${app.name}"? This action cannot be undone and will delete associated API keys and domains.`)
+    if (!ok) return
 
     setIsDeleting(true)
     try {

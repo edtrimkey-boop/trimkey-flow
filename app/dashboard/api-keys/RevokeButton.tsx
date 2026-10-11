@@ -1,17 +1,20 @@
-﻿'use client'
+'use client'
 
 import React, { useTransition } from 'react'
 import { useToast } from '@/components/ui/ToastProvider'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 import { revokeKeyAction } from './actions'
 import { useRouter } from 'next/navigation'
 
 export default function RevokeButton({ keyId }: { keyId: string }) {
   const [isPending, startTransition] = useTransition()
   const { showToast } = useToast()
+  const { confirm } = useConfirm()
   const router = useRouter()
 
-  const handleRevoke = () => {
-    if (!confirm('Are you sure you want to revoke this key? Action cannot be undone.')) return
+  const handleRevoke = async () => {
+    const ok = await confirm('Are you sure you want to revoke this API key? This action cannot be undone.')
+    if (!ok) return
     startTransition(async () => {
       try {
         await revokeKeyAction(keyId)

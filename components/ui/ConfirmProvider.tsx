@@ -39,22 +39,65 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {children}
       {isOpen && (
         <div className="glass-overlay active" style={{ zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="glass-box" style={{ maxWidth: '450px', width: '100%', padding: '40px', textAlign: 'left', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <div className="premium-sticky-header">
-                <h2 style={{ color: 'var(--brand)' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '8px' }}><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <div 
+            className="glass-box" 
+            style={{ 
+              maxWidth: '460px', 
+              width: '92%', 
+              padding: '32px', 
+              textAlign: 'left', 
+              maxHeight: '90vh', 
+              overflowY: 'auto', 
+              position: 'relative',
+              backgroundColor: 'rgba(10, 15, 25, 0.94)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8)',
+              borderRadius: '20px'
+            }}
+          >
+            <div className="premium-sticky-header" style={{ marginBottom: '16px' }}>
+                <h2 style={{ color: 'var(--brand)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '17px', fontWeight: 800 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
                   Confirm Action
                 </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <button type="button" className="close-minimal" onClick={handleCancel} style={{ position: 'relative', top: 0, right: 0 }}>&times;</button>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <button type="button" className="close-minimal" onClick={handleCancel} style={{ position: 'relative', top: 0, right: 0, cursor: 'pointer', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '20px' }}>&times;</button>
                 </div>
             </div>
-            <p style={{ marginBottom: '30px', lineHeight: 1.6, color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
+            <p style={{ marginBottom: '25px', lineHeight: 1.6, color: 'var(--text)', fontSize: '13.5px', fontWeight: 600 }}>
               {message}
             </p>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={handleCancel} className="btn-outline" style={{ flex: 1, borderColor: 'var(--text-muted)', color: 'var(--text-muted)', cursor: 'pointer', padding: '10px', borderRadius: '6px' }}>Cancel</button>
-              <button onClick={handleConfirm} style={{ flex: 1, background: 'linear-gradient(135deg, var(--danger), #B91C1C)', color: 'white', border: 'none', cursor: 'pointer', padding: '10px', borderRadius: '6px', fontWeight: 800 }}>Confirm</button>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button 
+                type="button"
+                onClick={handleCancel} 
+                className="liquid-glass" 
+                style={{ flex: 1, padding: '10px 16px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', textAlign: 'center' }}
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={handleConfirm} 
+                className="liquid-glass"
+                style={{ 
+                  flex: 1, 
+                  background: 'linear-gradient(135deg, var(--danger), #B91C1C)', 
+                  color: 'white', 
+                  border: '1px solid rgba(239, 68, 68, 0.6)', 
+                  cursor: 'pointer', 
+                  padding: '10px 16px', 
+                  fontSize: '12.5px',
+                  fontWeight: 800,
+                  textAlign: 'center'
+                }}
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>
