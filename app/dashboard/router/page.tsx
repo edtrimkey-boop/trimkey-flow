@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { NewRuleButton } from './NewRuleButton'
+import { EditRuleButton } from './EditRuleButton'
 
 export default async function RouterPage() {
   const db = createAdminClient()
@@ -70,10 +71,13 @@ export default async function RouterPage() {
                         <span className="badge bg-info">Curr: {rule.condition_currency}</span>
                       )}
                       {rule.condition_min_amount && (
-                        <span className="badge bg-warning">&gt; â‚¹{(rule.condition_min_amount / 100).toFixed(2)}</span>
+                        <span className="badge bg-warning">&gt; ₹{(rule.condition_min_amount / 100).toFixed(2)}</span>
                       )}
                       {rule.condition_max_amount && (
-                        <span className="badge bg-warning">&lt; â‚¹{(rule.condition_max_amount / 100).toFixed(2)}</span>
+                        <span className="badge bg-warning">&lt; ₹{(rule.condition_max_amount / 100).toFixed(2)}</span>
+                      )}
+                      {!rule.condition_currency && !rule.condition_min_amount && !rule.condition_max_amount && (
+                        <span className="badge bg-brand/20 text-brand">Always (Default)</span>
                       )}
                     </div>
                   </td>
@@ -93,9 +97,7 @@ export default async function RouterPage() {
                     )}
                   </td>
                   <td>
-                    <button className="flat-pill" style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)', fontSize: '11px', padding: '4px 12px' }}>
-                      Edit
-                    </button>
+                    <EditRuleButton rule={rule} providers={providers || []} />
                   </td>
                 </tr>
               ))

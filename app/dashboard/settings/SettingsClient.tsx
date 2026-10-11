@@ -75,6 +75,29 @@ export default function SettingsClient({ profile, organization, providers }: { p
               <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '6px' }}>ORGANIZATION</label>
               <input type="text" className="tk-input" defaultValue={organization?.name || 'Trim Key Corp'} disabled style={{ opacity: 0.5 }} />
             </div>
+
+            <div style={{ marginTop: '10px', paddingTop: '15px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <button 
+                type="button" 
+                onClick={() => { window.location.href = '/api/auth/signout'; }}
+                className="liquid-glass"
+                style={{ 
+                  color: 'var(--danger)', 
+                  borderColor: 'rgba(239, 68, 68, 0.3)', 
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  padding: '9px 16px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Secure Sign Out
+              </button>
+            </div>
           </div>
         </div>
       )}

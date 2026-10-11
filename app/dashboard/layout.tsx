@@ -26,16 +26,18 @@ export default function DashboardLayout({
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      // Invalidate server session
+      // 1. Server-side session invalidation via POST route handler
+      await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {});
+      // 2. Server Action signout
       await logoutAction().catch(() => {});
-      // Invalidate client supabase session
+      // 3. Client Supabase signOut
       const supabase = createClient();
       await supabase.auth.signOut().catch(() => {});
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
       try {
-        // Clear all persistent and session caches
+        // Clear all browser storage caches
         localStorage.clear();
         sessionStorage.clear();
 
@@ -44,7 +46,7 @@ export default function DashboardLayout({
           await Promise.all(cacheKeys.map((k) => window.caches.delete(k)));
         }
 
-        // Expire all cookies across domains
+        // Attempt client cookie expiration
         if (typeof document !== 'undefined') {
           const cookies = document.cookie.split(';');
           for (let i = 0; i < cookies.length; i++) {
@@ -61,7 +63,8 @@ export default function DashboardLayout({
       } catch (e) {
         console.error('Cache clear error:', e);
       }
-      window.location.href = '/login';
+      // Redirect via GET /api/auth/signout which deletes cookies via HTTP response headers and 302 redirects to /login
+      window.location.href = '/api/auth/signout';
     }
   };
 
@@ -160,8 +163,34 @@ export default function DashboardLayout({
           })}
         </div>
 
-        <div style={{ marginTop: "auto", padding: "20px 30px", fontSize: 11, color: "var(--text-muted)", fontWeight: 600, borderTop: "1px solid var(--border)" }}>
-          Version V1.0.0 (TK FLOW)
+        <div style={{ marginTop: "auto", padding: "16px 20px", borderTop: "1px solid var(--border)", display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button 
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="liquid-glass"
+            style={{ 
+              width: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '8px', 
+              padding: '9px', 
+              fontSize: '12px', 
+              fontWeight: 700, 
+              color: 'var(--danger)', 
+              borderColor: 'rgba(239, 68, 68, 0.25)',
+              background: 'rgba(239, 68, 68, 0.06)',
+              cursor: isLoggingOut ? 'wait' : 'pointer',
+              opacity: isLoggingOut ? 0.6 : 1,
+              borderRadius: '8px',
+            }}
+          >
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            {isLoggingOut ? 'Signing Out...' : 'Sign Out'}
+          </button>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, textAlign: 'center' }}>
+            Version V1.0.0 (TK FLOW)
+          </div>
         </div>
       </aside>
 
@@ -326,6 +355,16 @@ export default function DashboardLayout({
           <div className="fab-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
             Register Application
+          </div>
+          <div 
+            className="fab-item text-danger hover:bg-danger/10"
+            onClick={() => {
+              setFabOpen(false);
+              handleLogout();
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            Sign Out
           </div>
         </div>
       </div>

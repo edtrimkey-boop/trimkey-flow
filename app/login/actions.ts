@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export async function loginAction(formData: FormData): Promise<{ error?: string }> {
@@ -48,8 +49,20 @@ export async function magicLinkAction(email: string, redirectTo: string): Promis
 
 export async function logoutAction(): Promise<{ error?: string }> {
   try {
+    const cookieStore = await cookies()
     const supabase = await createClient()
-    await supabase.auth.signOut()
+    await supabase.auth.signOut().catch(() => {})
+    const allCookies = cookieStore.getAll()
+    for (const c of allCookies) {
+      if (
+        c.name.startsWith('sb-') ||
+        c.name.includes('auth') ||
+        c.name.includes('token') ||
+        c.name.includes('supabase')
+      ) {
+        cookieStore.delete(c.name)
+      }
+    }
     return {}
   } catch (err: any) {
     return { error: err?.message || 'Failed to sign out' }
