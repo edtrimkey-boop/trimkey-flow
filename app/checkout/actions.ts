@@ -155,3 +155,42 @@ export async function verifyCheckoutPayment(input: VerifyPaymentInput) {
     status: 'SUCCESS',
   }
 }
+
+export interface RecordFailureInput {
+  paymentNumber: string
+  code?: string
+  reason?: string
+  paymentId?: string
+}
+
+export async function recordPaymentFailureAction(input: RecordFailureInput) {
+  const db = createAdminClient()
+  const { paymentNumber, code, reason, paymentId } = input
+
+  const { data: payment } = await db
+    .from('payments')
+    .select('id, status')
+    .eq('payment_number', paymentNumber)
+    .maybeSingle()
+
+  if (!payment) return { success: false }
+
+  // If already confirmed success, do not overwrite
+  if (payment.status === 'SUCCESS' || payment.status === 'success') {
+    return { success: true }
+  }
+
+  await db
+    .from('payments')
+    .update({
+      status: 'FAILED',
+      failure_code: code || 'GATEWAY_ERROR',
+      failure_reason: reason || 'Payment was not completed by the user or was rejected by the gateway.',
+      provider_payment_id: paymentId || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', payment.id)
+
+  return { success: true }
+}
+

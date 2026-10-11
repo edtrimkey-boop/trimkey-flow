@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Script from 'next/script'
 import { Logo } from '@/components/ui/logo'
+import { getCheckoutData, verifyCheckoutPayment, recordPaymentFailureAction } from '../actions'
 
 export default function CheckoutPage() {
   const params = useParams()
@@ -17,7 +18,7 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    import('../actions').then(m => m.getCheckoutData(paymentNumber))
+    getCheckoutData(paymentNumber)
       .then(data => {
         setPaymentData(data)
         setLoading(false)
@@ -54,7 +55,6 @@ export default function CheckoutPage() {
             setVerifying(true)
             
             try {
-              const { verifyCheckoutPayment } = await import('../actions')
               await verifyCheckoutPayment({
                 paymentNumber,
                 razorpay_order_id: response.razorpay_order_id,
@@ -92,6 +92,27 @@ export default function CheckoutPage() {
         }
 
         const rzp1 = new (window as any).Razorpay(options)
+
+        // Capture payment failures directly from Razorpay SDK
+        rzp1.on('payment.failed', async function (response: any) {
+          console.error('[Razorpay Payment Failed]:', response.error)
+          const failureReason = response.error?.description || 'Payment was unsuccessful or rejected by gateway.'
+          setError(failureReason)
+          setProcessing(false)
+          setVerifying(false)
+
+          try {
+            await recordPaymentFailureAction({
+              paymentNumber,
+              code: response.error?.code,
+              reason: response.error?.description,
+              paymentId: response.error?.metadata?.payment_id,
+            })
+          } catch (recErr) {
+            console.error('Failed to log payment failure:', recErr)
+          }
+        })
+
         rzp1.open()
         
         // Mock success if Razorpay isn't fully set up with a real key
@@ -129,18 +150,19 @@ export default function CheckoutPage() {
     )
   }
 
-  if (error) {
+  if (error && !paymentData) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a1911', padding: '20px' }}>
          <div className="panel" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px' }}>
              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" style={{ margin: '0 auto 20px' }}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-             <h3 style={{ color: 'white', marginBottom: '10px' }}>Payment Failed</h3>
+             <h3 style={{ color: 'white', marginBottom: '10px' }}>Session Unavailable</h3>
              <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{error}</div>
          </div>
       </div>
     )
   }
 
+  const isConfirmedSuccess = success || paymentData?.status === 'SUCCESS' || paymentData?.status === 'success'
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a1911', padding: '20px' }}>
@@ -149,14 +171,14 @@ export default function CheckoutPage() {
 
        <div className="panel" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 30px', position: 'relative', overflow: 'hidden' }}>
           
-          {success ? (
+          {isConfirmedSuccess ? (
               <div style={{ padding: '20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <svg className="anim-check" width="80" height="80" viewBox="0 0 52 52" style={{ marginBottom: '20px' }}>
                     <circle className="anim-circle" cx="26" cy="26" r="25" fill="none" stroke="var(--brand)" strokeWidth="3" />
                     <path className="anim-check-path" fill="none" stroke="var(--brand)" strokeWidth="3" d="M14 27l7 7 16-16" />
                   </svg>
                   <h2 style={{ color: 'white', fontSize: '24px', fontWeight: 900, marginBottom: '10px' }}>Payment Successful</h2>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Redirecting you back to merchant...</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Your payment was cryptographically verified and recorded.</p>
               </div>
           ) : (
               <>
@@ -165,9 +187,28 @@ export default function CheckoutPage() {
                   </div>
                   
                   <h2 style={{ color: 'white', fontSize: '20px', marginBottom: '5px' }}>{paymentData.merchant_name}</h2>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 600, marginBottom: '30px' }}>Secure Checkout Session</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '12px', fontWeight: 600, marginBottom: '20px' }}>Secure Checkout Session</p>
                   
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 251, 166, 0.1)', marginBottom: '30px' }}>
+                  {error && (
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
+                      marginBottom: '20px',
+                      textAlign: 'left',
+                    }}>
+                      <div style={{ color: '#f87171', fontWeight: 800, fontSize: '12px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Gateway Alert
+                      </div>
+                      <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '11px', lineHeight: 1.4 }}>
+                        {error}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 251, 166, 0.1)', marginBottom: '24px' }}>
                      <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Total Amount</p>
                      <h1 style={{ fontSize: '38px', color: 'var(--brand)', fontWeight: 900, margin: '10px 0', letterSpacing: '-1px' }}>
                        {paymentData.currency === 'INR' ? '₹' : '$'}{(parseFloat(paymentData.amount) / 100).toFixed(2)}
@@ -176,7 +217,7 @@ export default function CheckoutPage() {
                   </div>
         
                   <button onClick={handlePay} disabled={processing || verifying} className="liquid-glass" style={{ width: '100%', padding: '16px', fontSize: '15px', fontWeight: 800, opacity: (processing || verifying) ? 0.7 : 1 }}>
-                     {verifying ? 'Verifying Gateway Cryptography...' : processing ? 'Opening Gateway...' : 'Pay with Trim Key'}
+                     {verifying ? 'Verifying Gateway Cryptography...' : processing ? 'Opening Gateway...' : error ? 'Retry Payment' : 'Pay with Trim Key'}
                   </button>
         
                   <div style={{ marginTop: '25px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>
