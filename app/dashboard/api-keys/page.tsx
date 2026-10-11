@@ -74,8 +74,13 @@ export default function ApiKeysPage() {
       
       // Auto-reveal newly generated keys
       setRevealStates(prev => ({ ...prev, [newKey.id]: true }))
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
+      if (err?.message?.includes('Server Action') || err?.message?.includes('not found') || err?.name === 'UnrecognizedActionError') {
+        showToast('New deployment detected! Refreshing page...', 'info')
+        setTimeout(() => window.location.reload(), 1000)
+        return
+      }
       showToast('Failed to generate key', 'error')
     } finally {
       setIsGenerating(false)
