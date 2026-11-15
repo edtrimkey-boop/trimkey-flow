@@ -188,7 +188,7 @@ export async function getProviderWebhookSecret(merchantProvider: MerchantProvide
   if (!merchantProvider.webhook_secret_encrypted) {
     // Fall back to global Razorpay webhook secret
     const { getServerEnv } = await import('@/config/env')
-    return getServerEnv().RAZORPAY_WEBHOOK_SECRET
+    return getServerEnv().RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || ''
   }
 
   return decrypt({

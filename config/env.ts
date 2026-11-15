@@ -16,10 +16,10 @@ const serverEnvSchema = z.object({
     .string()
     .min(32, 'FLOW_ENCRYPTION_KEY must be at least 32 chars (base64 of 32 bytes)'),
 
-  // ── Razorpay ──
-  RAZORPAY_KEY_ID: z.string().min(1, 'RAZORPAY_KEY_ID is required'),
-  RAZORPAY_KEY_SECRET: z.string().min(1, 'RAZORPAY_KEY_SECRET is required'),
-  RAZORPAY_WEBHOOK_SECRET: z.string().min(1, 'RAZORPAY_WEBHOOK_SECRET is required'),
+  // ── Razorpay (Optional in BYOG model — credentials stored in DB per merchant) ──
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
 
   // ── URLs ──
   FLOW_API_BASE_URL: z.string().url().default('https://flow.trimkey.in'),
