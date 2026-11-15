@@ -161,6 +161,28 @@ export async function verifyCheckoutPayment(input: VerifyPaymentInput) {
     })
     .eq('id', payment.order_id)
 
+  // 6. Non-blocking Webhook dispatch to application endpoint
+  const appWebhookUrl = payment.applications?.webhook_url
+  if (appWebhookUrl) {
+    fetch(appWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Trim-Key-Flow-Event': 'payment.success',
+      },
+      body: JSON.stringify({
+        event: 'payment.success',
+        id: payment.id,
+        payment_number: payment.payment_number,
+        amount: payment.amount,
+        currency: payment.currency_code,
+        metadata: payment.orders?.metadata || {},
+        timestamp: new Date().toISOString(),
+      }),
+      signal: AbortSignal.timeout(5000),
+    }).catch((err) => console.error('[Webhook Dispatch Notice]:', err?.message))
+  }
+
   return {
     verified: true,
     payment_number: payment.payment_number,
