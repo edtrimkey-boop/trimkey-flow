@@ -41,9 +41,9 @@ export interface CreateFlowOrderInput {
   amount: number
   currencyCode: string
   purpose: string
-  customerName?: string
-  customerEmail?: string
-  customerPhone?: string
+  customerName?: string | null
+  customerEmail?: string | null
+  customerPhone?: string | null
   idempotencyKey?: string
   metadata?: Record<string, unknown>
 }

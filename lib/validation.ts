@@ -27,8 +27,8 @@ export const CreatePaymentSchema = z.object({
     .max(255),
   customer: z
     .object({
-      name: z.string().max(255).optional(),
-      email: z.string().email().optional(),
+      name: z.string().max(255).optional().nullable(),
+      email: z.string().email().optional().nullable(),
       phone: z
         .string()
         .nullish()

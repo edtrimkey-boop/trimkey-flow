@@ -54,9 +54,9 @@ export interface CreatePaymentData {
   merchant_id?: string
   purpose: string
   customer?: {
-    name?: string
-    email?: string
-    phone?: string
+    name?: string | null
+    email?: string | null
+    phone?: string | null
   }
   metadata?: Record<string, unknown>
 }
