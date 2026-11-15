@@ -49,7 +49,12 @@ export default async function MerchantsPage() {
             <tbody>
               {merchants?.map(merchant => (
                 <tr key={merchant.id}>
-                  <td style={{ fontWeight: 600 }}>{merchant.name}</td>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{merchant.name}</div>
+                    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand)', marginTop: '3px', userSelect: 'all' }}>
+                      ID: {merchant.id}
+                    </div>
+                  </td>
                   <td>
                     <span className={`badge ${merchant.status === 'active' ? 'bg-success' : 'bg-warning'}`}>
                       {merchant.status.toUpperCase()}

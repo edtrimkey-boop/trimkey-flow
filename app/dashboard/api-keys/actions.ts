@@ -25,7 +25,7 @@ export async function generateNewKeyAction(applicationId: string, environment: s
       key_prefix: generated.keyPrefix,
       secret_hash: generated.secretHash,
       environment: environment,
-      permissions: ['payments:create', 'payments:read', 'orders:read'],
+      permissions: ['payments:create', 'payments:read', 'orders:read', 'refunds:create', 'refunds:read', 'transactions:read', 'merchants:read', 'applications:read'],
     })
     .select('*, applications(name)')
     .single()
