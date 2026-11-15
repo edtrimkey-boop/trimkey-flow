@@ -144,27 +144,47 @@ domain.create / domain.delete
 
 ---
 
+## Multi-Tenant BYOG & Webhook Architecture
+
+Trim Key Flow operates on a **BYOG (Bring Your Own Gateway)** model. Each merchant connects their own gateway account (e.g. Razorpay) so funds settle directly into their own bank account.
+
+> 📖 **Full Architecture & Implementation Guide:** See [docs/BYOG_AND_WEBHOOKS.md](docs/BYOG_AND_WEBHOOKS.md) for detailed diagrams, file indexes, and reliability flows.
+
+### Highlights:
+1. **Zero Environment Variables per Tenant:** All merchant gateway keys and webhook secrets are stored encrypted (AES-256-GCM) in the PostgreSQL database. Adding 100 businesses requires zero `.env` changes or redeployments.
+2. **Automated Webhook Registration:** When a merchant inputs their credentials, Trim Key Flow automatically registers `https://flow.trimkey.in/api/webhooks/razorpay` in their Razorpay account via API.
+3. **3-Tier Payment Reliability:**
+   - **Tier 1 (Client):** Instant UI checkmark via frontend SDK callback.
+   - **Tier 2 (Cloud Webhook):** Cloud-to-cloud server webhook independent of customer device, battery, or network status.
+   - **Tier 3 (Active Reconciliation):** On checkout reload or background cron job, Flow queries Razorpay's `orders.fetchPayments` directly to recover payments even if the user's laptop shut down mid-transaction.
+
+---
+
 ## Webhook Architecture
 
-**Razorpay → Trim Key Flow:**
+**Inbound (Gateways → Trim Key Flow):**
 ```
 POST /api/webhooks/razorpay
 ```
+Universal endpoint for all merchants. Flow dynamically resolves the merchant and decrypts their webhook secret to verify HMAC signatures.
+Events: `payment.captured`, `order.paid`, `payment.failed`, `refund.processed`
 
-Configure this URL in your Razorpay Dashboard > Webhooks.
-Events: `payment.captured`, `payment.failed`, `refund.processed`
-
-**Trim Key Flow → Your Application:**
+**Outbound (Trim Key Flow → Client Applications):**
 
 Set `webhook_url` on your Application record. Flow delivers:
 ```json
 {
-  "event": "payment.succeeded",
+  "event": "payment.success",
   "id": "evt_xxxxx",
-  "payment": { ... },
+  "payment_number": "TKF-PAY-20261115-000008",
+  "amount": 100,
+  "currency": "INR",
+  "provider_payment_id": "pay_xxxxxxxx",
+  "provider_order_id": "order_xxxxxxxx",
   "timestamp": "..."
 }
 ```
+Failed deliveries are automatically queued and retried with exponential backoff (30s, 2m, 8m, 32m).
 
 ---
 
