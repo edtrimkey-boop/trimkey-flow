@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AddDomainButton } from './AddDomain'
+import { DomainActions } from './DomainActions'
 
 export default async function DomainsPage() {
   const db = createAdminClient()
@@ -32,28 +33,39 @@ export default async function DomainsPage() {
               <th>Application</th>
               <th>Verified</th>
               <th>Added</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {(domains ?? []).length === 0 ? (
-              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No domains registered</td></tr>
+              <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '30px' }}>No domains registered</td></tr>
             ) : (
-              (domains as any[])!.map((d) => (
-                <tr key={d.id}>
-                  <td>
-                    <span style={{ color: 'white', fontWeight: 800 }}>{d.domain}</span>
-                  </td>
-                  <td>{d.applications?.name}</td>
-                  <td>
-                    <span className={`badge ${d.verified ? 'bg-success' : 'bg-warning'}`}>
-                      {d.verified ? 'Yes' : 'Pending'}
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--text-muted)' }}>
-                    {new Date(d.created_at).toLocaleDateString('en-IN')}
-                  </td>
-                </tr>
-              ))
+              (domains as any[])!.map((d) => {
+                const verified = Boolean(d.is_verified ?? d.verified)
+                return (
+                  <tr key={d.id}>
+                    <td>
+                      <span style={{ color: 'white', fontWeight: 800 }}>{d.domain}</span>
+                    </td>
+                    <td>{d.applications?.name || '—'}</td>
+                    <td>
+                      <span className={`badge ${verified ? 'bg-success' : 'bg-warning'}`}>
+                        {verified ? 'Verified' : 'Pending'}
+                      </span>
+                    </td>
+                    <td style={{ color: 'var(--text-muted)' }}>
+                      {new Date(d.created_at).toLocaleDateString('en-IN')}
+                    </td>
+                    <td>
+                      <DomainActions
+                        domainId={d.id}
+                        domainName={d.domain}
+                        isVerified={verified}
+                      />
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>
@@ -61,6 +73,3 @@ export default async function DomainsPage() {
     </div>
   )
 }
-
-
-

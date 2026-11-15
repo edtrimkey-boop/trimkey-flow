@@ -10,6 +10,8 @@ import type { Merchant, MerchantProvider, EncryptedCredentials } from '@/types/d
 import type { ApiKeyContext } from '@/types/api'
 import type { RazorpayCredentials } from '@/types/payment'
 import { RazorpayAdapter } from '@/providers/razorpay/adapter'
+import { StripeAdapter } from '@/providers/stripe/adapter'
+import { CashfreeAdapter } from '@/providers/cashfree/adapter'
 import type { PaymentProvider } from '@/providers/types'
 
 // ── Merchant Queries ──────────────────────────────────────────
@@ -114,25 +116,26 @@ export async function resolveDefaultProvider(merchantId: string): Promise<Mercha
  * Decrypt merchant provider credentials and return the appropriate PaymentProvider adapter.
  */
   export async function getProviderAdapter(merchantProvider: MerchantProvider): Promise<PaymentProvider> {
-    if (!merchantProvider.credentials_encrypted) {
-      if (merchantProvider.provider === 'stripe') {
-        const { StripeAdapter } = require('../providers/stripe/adapter')
-        return new StripeAdapter({ key: 'dummy' })
-      }
-      if (merchantProvider.provider === 'cashfree') {
-        const { StripeAdapter } = require('../providers/stripe/adapter') // Reuse mock for now
-        return new StripeAdapter({ key: 'dummy' })
-      }
-      if (merchantProvider.provider === 'razorpay') {
-        return new RazorpayAdapter({ 
-          key_id: process.env.RAZORPAY_KEY_ID || 'dummy', 
-          key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy' 
-        })
-      }
-      throw new FlowError(ErrorCode.PROVIDER_NOT_CONFIGURED, 'Provider credentials not configured', 400)
-    }
-
   const provider = merchantProvider.provider
+
+  if (!merchantProvider.credentials_encrypted) {
+    if (provider === 'stripe') {
+      return new StripeAdapter({ key: process.env.STRIPE_SECRET_KEY || 'dummy' })
+    }
+    if (provider === 'cashfree') {
+      return new CashfreeAdapter({
+        app_id: process.env.CASHFREE_APP_ID || 'dummy',
+        secret_key: process.env.CASHFREE_SECRET_KEY || 'dummy',
+      })
+    }
+    if (provider === 'razorpay') {
+      return new RazorpayAdapter({ 
+        key_id: process.env.RAZORPAY_KEY_ID || 'dummy', 
+        key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy' 
+      })
+    }
+    throw new FlowError(ErrorCode.PROVIDER_NOT_CONFIGURED, 'Provider credentials not configured', 400)
+  }
 
   if (provider === 'razorpay') {
     const credentials = await decrypt(merchantProvider.credentials_encrypted as EncryptedCredentials)
@@ -140,11 +143,16 @@ export async function resolveDefaultProvider(merchantId: string): Promise<Mercha
     return new RazorpayAdapter(creds)
   }
 
-  if (provider === 'cashfree' || provider === 'stripe') {
-    const { StripeAdapter } = require('../providers/stripe/adapter')
+  if (provider === 'stripe') {
     const credentials = await decrypt(merchantProvider.credentials_encrypted as EncryptedCredentials)
-    // We parse it, but still use our StripeAdapter mock to emulate checkout
-    return new StripeAdapter({ key: 'dummy' })
+    const creds = JSON.parse(credentials)
+    return new StripeAdapter(creds)
+  }
+
+  if (provider === 'cashfree') {
+    const credentials = await decrypt(merchantProvider.credentials_encrypted as EncryptedCredentials)
+    const creds = JSON.parse(credentials)
+    return new CashfreeAdapter(creds)
   }
 
   throw new FlowError(ErrorCode.PROVIDER_NOT_CONFIGURED, `Provider ${provider} is not supported`, 400)

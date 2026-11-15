@@ -19,3 +19,32 @@ export async function addDomainAction(applicationId: string, domain: string) {
 
   revalidatePath('/dashboard/domains')
 }
+
+export async function deleteDomainAction(domainId: string) {
+  const db = createAdminClient()
+
+  const { error } = await (db as any).from('application_domains').delete().eq('id', domainId)
+
+  if (error) {
+    console.error(error)
+    throw new Error('Failed to delete domain: ' + error.message)
+  }
+
+  revalidatePath('/dashboard/domains')
+}
+
+export async function toggleDomainVerificationAction(domainId: string, currentStatus: boolean) {
+  const db = createAdminClient()
+
+  const { error } = await (db as any).from('application_domains').update({
+    is_verified: !currentStatus,
+    verified_at: !currentStatus ? new Date().toISOString() : null
+  }).eq('id', domainId)
+
+  if (error) {
+    console.error(error)
+    throw new Error('Failed to update verification status: ' + error.message)
+  }
+
+  revalidatePath('/dashboard/domains')
+}

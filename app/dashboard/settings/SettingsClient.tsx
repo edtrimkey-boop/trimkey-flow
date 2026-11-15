@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/ToastProvider";
-import { updateProfile, toggleProvider } from "./actions";
+import { updateProfile, toggleProvider, updateDeveloperMode } from "./actions";
 
 export default function SettingsClient({ profile, organization, providers }: { profile: any, organization: any, providers: any[] }) {
   const searchParams = useSearchParams();
@@ -11,20 +11,47 @@ export default function SettingsClient({ profile, organization, providers }: { p
   
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [isTestMode, setIsTestMode] = useState(false);
+  const [isTestMode, setIsTestMode] = useState(Boolean(organization?.metadata?.developer_mode));
+  const [isUpdatingMode, setIsUpdatingMode] = useState(false);
 
   const [name, setName] = useState(profile?.full_name || '');
   const [email, setEmail] = useState(organization?.email || '');
 
   const handleSaveProfile = async () => {
     if (!profile) return;
-    await updateProfile(profile.id, name);
-    showToast('Profile updated successfully', 'success');
+    try {
+      await updateProfile(profile.id, name, organization?.id, email);
+      showToast('Profile and organization updated successfully', 'success');
+    } catch {
+      showToast('Failed to update profile', 'error');
+    }
   };
 
   const handleToggleProvider = async (providerId: string, currentStatus: boolean) => {
-    await toggleProvider(providerId, !currentStatus);
-    showToast('Provider status updated', 'success');
+    try {
+      await toggleProvider(providerId, !currentStatus);
+      showToast('Provider status updated', 'success');
+    } catch {
+      showToast('Failed to update provider status', 'error');
+    }
+  };
+
+  const handleToggleDeveloperMode = async (newVal: boolean) => {
+    if (!organization?.id) {
+      showToast('Organization not found', 'error');
+      return;
+    }
+    setIsTestMode(newVal);
+    setIsUpdatingMode(true);
+    try {
+      await updateDeveloperMode(organization.id, newVal);
+      showToast(newVal ? 'Developer Mode enabled (Simulating transactions)' : 'Developer Mode disabled (Live transactions)', 'info');
+    } catch {
+      setIsTestMode(!newVal);
+      showToast('Failed to update Developer Mode setting', 'error');
+    } finally {
+      setIsUpdatingMode(false);
+    }
   };
 
   return (
@@ -131,7 +158,12 @@ export default function SettingsClient({ profile, organization, providers }: { p
                 <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Route all payments to mock adapter.</div>
               </div>
               <label className="toggle-switch">
-                <input type="checkbox" checked={isTestMode} onChange={(e) => setIsTestMode(e.target.checked)} />
+                <input 
+                  type="checkbox" 
+                  checked={isTestMode} 
+                  disabled={isUpdatingMode}
+                  onChange={(e) => handleToggleDeveloperMode(e.target.checked)} 
+                />
                 <span className="slider round"></span>
               </label>
             </div>

@@ -1,0 +1,24 @@
+name: Supabase Keep-Alive Health Check
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every 3 days to keep Supabase project active
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping flow.trimkey.in/api/health
+        run: |
+          echo "Pinging Trim Key Flow Health Endpoint..."
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" https://flow.trimkey.in/api/health)
+          echo "Response code: $HTTP_STATUS"
+          cat response.json
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Health check failed with status $HTTP_STATUS"
+            exit 1
+          fi
+          echo "Health check passed. Supabase is active."

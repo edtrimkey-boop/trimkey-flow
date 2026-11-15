@@ -118,3 +118,82 @@ export async function deliverWebhook(
     }).catch(() => {})
   }
 }
+
+/**
+ * Worker function to query and retry all pending webhook deliveries.
+ * Called by scheduled cron jobs (/api/cron/webhooks).
+ */
+export async function retryPendingWebhooks(): Promise<{
+  total: number
+  succeeded: number
+  retried: number
+  failed: number
+}> {
+  const db = createAdminClient()
+  const now = new Date().toISOString()
+
+  // 1. Fetch pending retries whose delay window has elapsed
+  const { data: pendingDeliveries, error } = await db
+    .from('webhook_deliveries')
+    .select('*, webhook_events(payload)')
+    .eq('status', 'RETRYING')
+    .lte('next_retry_at', now)
+    .order('next_retry_at', { ascending: true })
+    .limit(50)
+
+  const deliveries = (pendingDeliveries || []) as any[]
+  if (error || deliveries.length === 0) {
+    return { total: 0, succeeded: 0, retried: 0, failed: 0 }
+  }
+
+  let succeeded = 0
+  let retried = 0
+  let failed = 0
+
+  for (const item of deliveries) {
+    // Mark previous attempt as SUPERSEDED to avoid concurrent re-processing
+    await (db as any)
+      .from('webhook_deliveries')
+      .update({ status: 'SUPERSEDED' })
+      .eq('id', item.id)
+
+    const payload: WebhookPayload = (item.webhook_events?.payload as any) || {
+      event: item.event_type,
+      id: item.webhook_event_id,
+      timestamp: new Date().toISOString(),
+    }
+
+    try {
+      await deliverWebhook(
+        item.webhook_event_id,
+        item.application_id,
+        item.endpoint_url,
+        item.event_type,
+        payload,
+        item.attempt_number + 1
+      )
+      // Check the latest inserted status
+      const { data: latest } = await db
+        .from('webhook_deliveries')
+        .select('status')
+        .eq('webhook_event_id', item.webhook_event_id)
+        .order('attempt_number', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (latest?.status === 'SUCCESS') succeeded++
+      else if (latest?.status === 'RETRYING') retried++
+      else failed++
+    } catch {
+      failed++
+    }
+  }
+
+  return {
+    total: pendingDeliveries.length,
+    succeeded,
+    retried,
+    failed,
+  }
+}
+
