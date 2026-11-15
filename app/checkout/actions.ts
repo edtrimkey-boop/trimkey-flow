@@ -209,7 +209,7 @@ export async function verifyCheckoutPayment(input: VerifyPaymentInput) {
     .eq('id', payment.order_id)
 
   // 6. Non-blocking Webhook dispatch to application endpoint
-  const appWebhookUrl = payment.applications?.webhook_url
+  const appWebhookUrl = payment.applications?.webhook_url || payment.orders?.metadata?.webhook_url || 'https://backend-ed.trimkey.in/api/gateway';
   if (appWebhookUrl) {
     fetch(appWebhookUrl, {
       method: 'POST',

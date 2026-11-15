@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       .eq('id', orderData.id)
 
     // 8. Log Event & Notify Merchant Webhook
-    const merchantWebhookUrl = updatedPayment.applications?.webhook_url
+    const merchantWebhookUrl = updatedPayment.applications?.webhook_url || orderData?.metadata?.webhook_url || 'https://backend-ed.trimkey.in/api/gateway';
     if (merchantWebhookUrl) {
       const { data: eventData } = await db
         .from('webhook_events')
