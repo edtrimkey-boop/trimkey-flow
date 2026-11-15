@@ -38,19 +38,67 @@ export async function onboardMerchantAction(formData: FormData) {
   }
 
   // 2. Encrypt the credentials
+  const cleanKeyId = keyId.trim()
+  const cleanKeySecret = keySecret ? keySecret.trim() : ''
   const credentials = JSON.stringify({
-    key_id: keyId,
-    key_secret: keySecret
+    key_id: cleanKeyId,
+    key_secret: cleanKeySecret
   })
   const credentialsEncrypted = await encrypt(credentials)
   
-  // Encrypt webhook secret if provided
-  let webhookSecretEncrypted = null
-  if (webhookSecret) {
-    webhookSecretEncrypted = await encrypt(webhookSecret)
+  // 3. Automated BYOG Webhook Registration
+  let effectiveWebhookSecret = webhookSecret ? webhookSecret.trim() : null
+
+  if (provider === 'razorpay' && cleanKeyId && cleanKeySecret) {
+    try {
+      const crypto = await import('crypto')
+      const Razorpay = (await import('razorpay')).default || (await import('razorpay'))
+      const rzp = new Razorpay({ key_id: cleanKeyId, key_secret: cleanKeySecret })
+
+      const flowWebhookUrl = `${process.env.FLOW_API_BASE_URL || 'https://flow.trimkey.in'}/api/webhooks/razorpay`
+
+      // Auto-generate strong webhook secret if not explicitly provided
+      if (!effectiveWebhookSecret) {
+        effectiveWebhookSecret = `whsec_${crypto.randomBytes(16).toString('hex')}`
+      }
+
+      // Check if webhook URL is already registered in merchant's Razorpay account
+      let alreadyRegistered = false
+      try {
+        const existingList = await rzp.webhooks.all()
+        if (existingList && Array.isArray((existingList as any).items)) {
+          alreadyRegistered = (existingList as any).items.some((wh: any) => wh.url === flowWebhookUrl)
+        }
+      } catch {
+        // Restricted API keys may not support listing; continue to create
+      }
+
+      if (!alreadyRegistered) {
+        await rzp.webhooks.create({
+          url: flowWebhookUrl,
+          alert_email: 'notifications@trimkey.in',
+          secret: effectiveWebhookSecret,
+          events: [
+            'payment.captured',
+            'order.paid'
+          ]
+        })
+        console.log(`[Trim Key Flow BYOG]: Automated webhook registered with Razorpay for merchant ${name}`)
+      } else {
+        console.log(`[Trim Key Flow BYOG]: Webhook already registered in Razorpay for merchant ${name}`)
+      }
+    } catch (whErr: any) {
+      console.warn(`[Trim Key Flow BYOG Notice]: Razorpay auto-webhook registration skipped or restricted:`, whErr?.message || whErr)
+    }
   }
 
-  // 3. Insert the Merchant Provider mapped to the new Merchant
+  // Encrypt webhook secret
+  let webhookSecretEncrypted = null
+  if (effectiveWebhookSecret) {
+    webhookSecretEncrypted = await encrypt(effectiveWebhookSecret)
+  }
+
+  // 4. Insert the Merchant Provider mapped to the new Merchant
   const { error: providerError } = await db
     .from('merchant_providers')
     .insert({

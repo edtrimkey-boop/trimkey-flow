@@ -33,3 +33,23 @@ export async function createRazorpayOrder(
     throw new FlowError(ErrorCode.PROVIDER_ERROR, message, 502)
   }
 }
+
+/**
+ * Fetch all payment attempts for a given Razorpay order.
+ * Used for auto-reconciliation when client disconnects or webhook is delayed.
+ */
+export async function getRazorpayOrderPayments(
+  credentials: RazorpayCredentials,
+  providerOrderId: string,
+): Promise<any[]> {
+  const razorpay = createRazorpayClient(credentials)
+
+  try {
+    const payments = await razorpay.orders.fetchPayments(providerOrderId)
+    return (payments as any)?.items || []
+  } catch (err: unknown) {
+    const rzpErr = err as { error?: { description?: string } }
+    console.warn('[Razorpay fetchPayments Warning]:', rzpErr?.error?.description || err)
+    return []
+  }
+}

@@ -59,6 +59,7 @@ export async function getCheckoutData(paymentNumber: string) {
   }
 
   let keyId = process.env.RAZORPAY_KEY_ID || 'dummy'
+  let keySecret = process.env.RAZORPAY_KEY_SECRET || ''
   const { data: providerRec } = await db
     .from('merchant_providers')
     .select('credentials_encrypted')
@@ -71,8 +72,81 @@ export async function getCheckoutData(paymentNumber: string) {
       const decrypted = await decrypt(providerRec.credentials_encrypted as EncryptedCredentials)
       const parsed = JSON.parse(decrypted)
       if (parsed.key_id) keyId = parsed.key_id
+      if (parsed.key_secret) keySecret = parsed.key_secret
     } catch {
       // fallback to process.env.RAZORPAY_KEY_ID
+    }
+  }
+
+  // ⚡ Active Reconciliation: If client reloaded, session restored, or connection dropped,
+  // check directly with gateway to see if the order was already captured.
+  let reconciledPaymentId = payment.provider_payment_id
+  let reconciledPaidAt = payment.paid_at
+
+  if (currentStatus !== 'SUCCESS' && currentStatus !== 'success' && currentStatus !== 'EXPIRED' && order?.provider_order_id && keyId && keySecret) {
+    try {
+      const Razorpay = (await import('razorpay')).default || (await import('razorpay'))
+      const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret })
+      const paymentsList = await rzp.orders.fetchPayments(order.provider_order_id)
+      const capturedPayment = paymentsList?.items?.find((p: any) => p.status === 'captured')
+      if (capturedPayment) {
+        console.log(`[Auto-Reconciliation]: Order ${order.provider_order_id} was paid via gateway payment ${capturedPayment.id}! Updating status.`)
+        currentStatus = 'SUCCESS'
+        reconciledPaymentId = capturedPayment.id
+        reconciledPaidAt = new Date().toISOString()
+
+        await db.from('payments').update({
+          status: 'SUCCESS',
+          provider_payment_id: capturedPayment.id,
+          paid_at: reconciledPaidAt,
+          updated_at: new Date().toISOString(),
+        }).eq('id', payment.id)
+
+        if (payment.order_id) {
+          await db.from('orders').update({
+            status: 'PAID',
+            updated_at: new Date().toISOString(),
+          }).eq('id', payment.order_id)
+        }
+
+        // Webhook dispatch to application endpoint
+        const { data: fullPayment } = await db
+          .from('payments')
+          .select('*, applications(webhook_url), orders(metadata)')
+          .eq('id', payment.id)
+          .maybeSingle()
+
+        const appWebhookUrl = fullPayment?.applications?.webhook_url || fullPayment?.orders?.metadata?.webhook_url || 'https://backend-ed.trimkey.in/api/gateway'
+        if (appWebhookUrl) {
+          fetch(appWebhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Trim-Key-Flow-Event': 'payment.success',
+            },
+            body: JSON.stringify({
+              event: 'payment.success',
+              id: payment.id,
+              payment_number: payment.payment_number,
+              amount: payment.amount,
+              currency: payment.currency_code,
+              provider_payment_id: capturedPayment.id,
+              provider_order_id: order.provider_order_id,
+              gateway_payment_id: capturedPayment.id,
+              gateway_order_id: order.provider_order_id,
+              metadata: {
+                ...(fullPayment?.orders?.metadata || {}),
+                provider_payment_id: capturedPayment.id,
+                provider_order_id: order.provider_order_id
+              },
+              timestamp: new Date().toISOString(),
+            }),
+            signal: AbortSignal.timeout(5000),
+          }).catch(err => console.warn('[Auto-Reconciliation Webhook Notice]:', err?.message))
+        }
+      }
+    } catch (checkErr: any) {
+      // Non-blocking check
     }
   }
 
@@ -84,8 +158,8 @@ export async function getCheckoutData(paymentNumber: string) {
     purpose: order?.purpose || 'Order Checkout',
     customer_name: order?.customer_name,
     status: currentStatus,
-    paid_at: payment.paid_at,
-    provider_payment_id: payment.provider_payment_id,
+    paid_at: reconciledPaidAt,
+    provider_payment_id: reconciledPaymentId,
     key_id: keyId,
     expires_at: new Date(expiresAtMs).toISOString(),
     remaining_seconds: Math.max(0, Math.floor((expiresAtMs - nowMs) / 1000))

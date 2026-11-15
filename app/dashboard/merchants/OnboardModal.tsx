@@ -64,13 +64,16 @@ export function OnboardModal() {
               </select>
             </div>
             <div className="form-group">
-              <label className="label-text">Webhook Secret (Optional)</label>
-              <input name="webhook_secret" type="password" className="form-input" placeholder="For receiving webhooks" />
+              <label className="label-text">Webhook Secret <span style={{ fontSize: '10px', color: 'var(--brand)', fontWeight: 700 }}>(Auto-configured if blank)</span></label>
+              <input name="webhook_secret" type="password" className="form-input" placeholder="Auto-generated & registered via API" />
             </div>
           </div>
 
           <div className="form-group" style={{ marginBottom: '15px', background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-            <label className="label-text" style={{ color: 'var(--brand)' }}>Gateway Credentials</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label className="label-text" style={{ color: 'var(--brand)', margin: 0 }}>Gateway Credentials (BYOG)</label>
+              <span style={{ fontSize: '10px', color: '#00fba6', background: 'rgba(0, 251, 166, 0.1)', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>Auto-Webhook Enabled</span>
+            </div>
             
             <div style={{ marginTop: '10px' }}>
               <label className="label-text">Key ID / Publishable Key <span className="req">*</span></label>
@@ -80,6 +83,10 @@ export function OnboardModal() {
             <div>
               <label className="label-text">Key Secret <span className="req">*</span></label>
               <input required name="key_secret" type="password" className="form-input" />
+            </div>
+
+            <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+              ⚡ <strong>Zero Setup:</strong> Trim Key Flow will automatically register <code>https://flow.trimkey.in/api/webhooks/razorpay</code> into your gateway account upon saving.
             </div>
           </div>
 

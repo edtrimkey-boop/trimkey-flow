@@ -25,6 +25,11 @@ export interface PaymentProvider {
   getPayment(providerPaymentId: string): Promise<ProviderPayment>
 
   /**
+   * Fetch all payment attempts for a provider order (reconciliation).
+   */
+  getOrderPayments?(providerOrderId: string): Promise<any[]>
+
+  /**
    * Create a refund for a captured payment.
    */
   createRefund(input: CreateRefundInput): Promise<ProviderRefund>

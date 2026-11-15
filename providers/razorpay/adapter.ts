@@ -13,7 +13,7 @@ import type {
   ProviderRefund,
   RazorpayCredentials,
 } from '@/types/payment'
-import { createRazorpayOrder } from './orders'
+import { createRazorpayOrder, getRazorpayOrderPayments } from './orders'
 import { getRazorpayPayment } from './payments'
 import { createRazorpayRefund } from './refunds'
 import { verifyRazorpayWebhook } from './webhook'
@@ -31,6 +31,10 @@ export class RazorpayAdapter implements PaymentProvider {
 
   async getPayment(providerPaymentId: string): Promise<ProviderPayment> {
     return getRazorpayPayment(this.credentials, providerPaymentId)
+  }
+
+  async getOrderPayments(providerOrderId: string): Promise<any[]> {
+    return getRazorpayOrderPayments(this.credentials, providerOrderId)
   }
 
   async createRefund(input: CreateRefundInput): Promise<ProviderRefund> {
