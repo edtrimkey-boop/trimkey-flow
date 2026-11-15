@@ -138,6 +138,26 @@ export default function CheckoutPage() {
       ;(window as any).tkPlaySound('notification')
     }
     setSuccess(true)
+
+    // Notify parent application if embedded in an iframe or popup
+    if (typeof window !== 'undefined') {
+      try {
+        const payload = {
+          type: 'TK_FLOW_PAYMENT_SUCCESS',
+          paymentNumber,
+          amount: paymentData?.amount,
+          status: 'SUCCESS'
+        }
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage(payload, '*')
+        }
+        if (window.opener) {
+          window.opener.postMessage(payload, '*')
+        }
+      } catch (err) {
+        console.error('[Trim Key Flow]: PostMessage dispatch error', err)
+      }
+    }
   }
 
   const isConfirmedSuccess = success || paymentData?.status === 'SUCCESS' || paymentData?.status === 'success'
@@ -394,6 +414,9 @@ export default function CheckoutPage() {
 
             <button
               onClick={() => {
+                if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+                  window.parent.postMessage({ type: 'TK_FLOW_CLOSE_MODAL', paymentNumber }, '*')
+                }
                 if (window.opener) {
                   window.close()
                 } else {
