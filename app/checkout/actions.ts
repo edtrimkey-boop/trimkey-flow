@@ -176,7 +176,15 @@ export async function verifyCheckoutPayment(input: VerifyPaymentInput) {
         payment_number: payment.payment_number,
         amount: payment.amount,
         currency: payment.currency_code,
-        metadata: payment.orders?.metadata || {},
+        provider_payment_id: razorpay_payment_id,
+        provider_order_id: razorpay_order_id,
+        gateway_payment_id: razorpay_payment_id,
+        gateway_order_id: razorpay_order_id,
+        metadata: {
+          ...(payment.orders?.metadata || {}),
+          provider_payment_id: razorpay_payment_id,
+          provider_order_id: razorpay_order_id
+        },
         timestamp: new Date().toISOString(),
       }),
       signal: AbortSignal.timeout(5000),
@@ -186,6 +194,8 @@ export async function verifyCheckoutPayment(input: VerifyPaymentInput) {
   return {
     verified: true,
     payment_number: payment.payment_number,
+    provider_payment_id: razorpay_payment_id,
+    provider_order_id: razorpay_order_id,
     status: 'SUCCESS',
   }
 }

@@ -70,7 +70,7 @@ export default function CheckoutPage() {
               razorpay_signature: response.razorpay_signature,
             })
             setVerifying(false)
-            triggerSuccess()
+            triggerSuccess(response)
           } catch (verifErr: any) {
             console.error('[Checkout Security Alert]: Verification failed', verifErr)
             setVerifying(false)
@@ -133,7 +133,7 @@ export default function CheckoutPage() {
     }, 600)
   }
 
-  function triggerSuccess() {
+  function triggerSuccess(gatewayResponse?: any) {
     if (typeof window !== 'undefined' && (window as any).tkPlaySound) {
       ;(window as any).tkPlaySound('notification')
     }
@@ -142,11 +142,17 @@ export default function CheckoutPage() {
     // Notify parent application if embedded in an iframe or popup
     if (typeof window !== 'undefined') {
       try {
+        const provPaymentId = gatewayResponse?.razorpay_payment_id || paymentData?.provider_payment_id;
+        const provOrderId = gatewayResponse?.razorpay_order_id || paymentData?.provider_order_id;
         const payload = {
           type: 'TK_FLOW_PAYMENT_SUCCESS',
           paymentNumber,
           amount: paymentData?.amount,
-          status: 'SUCCESS'
+          status: 'SUCCESS',
+          provider_payment_id: provPaymentId,
+          provider_order_id: provOrderId,
+          razorpay_payment_id: provPaymentId,
+          razorpay_order_id: provOrderId
         }
         if (window.parent && window.parent !== window) {
           window.parent.postMessage(payload, '*')
