@@ -56,32 +56,55 @@ export async function listMerchants(
 
 /**
  * Resolve a merchant for a payment request.
- * Verifies the merchant belongs to the caller's organization.
+ * If merchantId is provided, verifies it belongs to the caller's organization.
+ * If omitted, automatically resolves the default active merchant for the organization.
  */
 export async function resolveMerchantForApplication(
-  merchantId: string,
+  merchantId: string | undefined,
   organizationId: string,
 ): Promise<Merchant> {
   const db = createAdminClient()
 
-  const { data, error } = await db
+  if (merchantId) {
+    const { data, error } = await db
+      .from('merchants')
+      .select('*')
+      .eq('id', merchantId)
+      .eq('organization_id', organizationId)
+      .eq('status', 'active')
+      .maybeSingle<Merchant>()
+
+    if (error) throw new FlowError(ErrorCode.INTERNAL_ERROR, 'Failed to resolve merchant', 500)
+    if (!data) {
+      throw new FlowError(
+        ErrorCode.MERCHANT_NOT_FOUND,
+        'Merchant not found or not authorized for this organization',
+        404,
+      )
+    }
+    return data
+  }
+
+  // Auto-resolve default active merchant for this organization
+  const { data: defaultMerchant, error: defErr } = await db
     .from('merchants')
     .select('*')
-    .eq('id', merchantId)
     .eq('organization_id', organizationId)
     .eq('status', 'active')
+    .order('created_at', { ascending: true })
+    .limit(1)
     .maybeSingle<Merchant>()
 
-  if (error) throw new FlowError(ErrorCode.INTERNAL_ERROR, 'Failed to resolve merchant', 500)
-  if (!data) {
+  if (defErr) throw new FlowError(ErrorCode.INTERNAL_ERROR, 'Failed to resolve default merchant', 500)
+  if (!defaultMerchant) {
     throw new FlowError(
       ErrorCode.MERCHANT_NOT_FOUND,
-      'Merchant not found or not authorized for this organization',
+      'No active merchant configured for this organization',
       404,
     )
   }
 
-  return data
+  return defaultMerchant
 }
 
 // ── Provider Resolution ────────────────────────────────────────

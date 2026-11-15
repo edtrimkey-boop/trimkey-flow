@@ -51,7 +51,7 @@ export type FlowAction =
 export interface CreatePaymentData {
   amount: number
   currency: string
-  merchant_id: string
+  merchant_id?: string
   purpose: string
   customer?: {
     name?: string

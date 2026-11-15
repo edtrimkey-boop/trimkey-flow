@@ -20,7 +20,7 @@ export const CreatePaymentSchema = z.object({
     .string({ required_error: 'currency is required' })
     .toUpperCase()
     .length(3, 'Currency must be a 3-letter ISO code'),
-  merchant_id: uuidSchema,
+  merchant_id: uuidSchema.optional(),
   purpose: z
     .string({ required_error: 'purpose is required' })
     .min(1)
