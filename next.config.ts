@@ -9,6 +9,23 @@ const nextConfig: NextConfig = {
       static: 1800,
     },
   },
+  async headers() {
+    return [
+      {
+        source: '/checkout/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://*.trimkey.in http://localhost:* *;",
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default nextConfig

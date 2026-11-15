@@ -17,18 +17,46 @@ export default function CheckoutPage() {
   const [verifying, setVerifying] = useState(false)
   const [success, setSuccess] = useState(false)
   const [copiedTrx, setCopiedTrx] = useState(false)
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(900)
 
   useEffect(() => {
     getCheckoutData(paymentNumber)
       .then(data => {
         setPaymentData(data)
+        if (typeof data.remaining_seconds === 'number') {
+          setRemainingSeconds(data.remaining_seconds)
+        }
         setLoading(false)
+        if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'TK_FLOW_READY', paymentNumber }, '*')
+        }
       })
       .catch(err => {
         setError(err.message || 'Unable to load payment session')
         setLoading(false)
+        if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'TK_FLOW_READY', paymentNumber }, '*')
+        }
       })
   }, [paymentNumber])
+
+  // Live countdown timer for 15-minute payment session
+  useEffect(() => {
+    if (loading || success || !paymentData) return
+    if (paymentData.status === 'SUCCESS' || paymentData.status === 'success' || paymentData.status === 'EXPIRED') return
+
+    const timer = setInterval(() => {
+      setRemainingSeconds(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [loading, success, paymentData])
 
   function handleCopyTrx() {
     if (!paymentNumber) return
@@ -39,6 +67,10 @@ export default function CheckoutPage() {
 
   function handlePay() {
     if (!paymentData) return
+    if (remainingSeconds <= 0 || paymentData.status === 'EXPIRED') {
+      setError('This payment link has expired after 15 minutes of inactivity. Please return to your app to initiate a fresh session.')
+      return
+    }
     setProcessing(true)
     setError(null)
 
@@ -167,6 +199,7 @@ export default function CheckoutPage() {
   }
 
   const isConfirmedSuccess = success || paymentData?.status === 'SUCCESS' || paymentData?.status === 'success'
+  const isExpired = (!isConfirmedSuccess && (remainingSeconds <= 0 || paymentData?.status === 'EXPIRED'))
 
   if (loading) {
     return (
@@ -349,7 +382,62 @@ export default function CheckoutPage() {
           textAlign: 'center',
         }}
       >
-        {isConfirmedSuccess ? (
+        {isExpired ? (
+          /* ================= EXPIRED STATE ================= */
+          <div style={{ padding: '10px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+              style={{
+                width: '76px',
+                height: '76px',
+                borderRadius: '50%',
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '20px',
+                boxShadow: '0 0 30px rgba(239, 68, 68, 0.3)',
+              }}
+            >
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+
+            <h2 style={{ color: '#fff', fontSize: '22px', fontWeight: 900, margin: '0 0 6px' }}>
+              Payment Session Expired
+            </h2>
+            <p style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: '13px', margin: '0 0 24px', lineHeight: 1.5 }}>
+              This checkout link has timed out after 15 minutes of inactivity to protect your account. Please return to your app to initiate a new session.
+            </p>
+
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+                  window.parent.postMessage({ type: 'TK_FLOW_CLOSE_MODAL', paymentNumber }, '*')
+                }
+                if (window.opener) {
+                  window.close()
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '14px',
+                fontWeight: 800,
+                fontSize: '13px',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#fff',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Close & Try Again
+            </button>
+          </div>
+        ) : isConfirmedSuccess ? (
           /* ================= SUCCESS STATE ================= */
           <div style={{ padding: '10px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div
@@ -479,9 +567,39 @@ export default function CheckoutPage() {
               <span>Verified Merchant</span>
             </div>
 
-            <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 24px', fontWeight: 500 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '0 0 16px', fontWeight: 500 }}>
               {paymentData.purpose || 'Secure Checkout Session'}
             </p>
+
+            {/* Live 15-Minute Expiry Countdown Pill */}
+            {remainingSeconds > 0 && !isExpired && (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 14px',
+                  borderRadius: '50px',
+                  background: remainingSeconds < 180 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                  border: remainingSeconds < 180 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(255, 255, 255, 0.1)',
+                  color: remainingSeconds < 180 ? '#fca5a5' : 'rgba(255, 255, 255, 0.75)',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  marginBottom: '20px',
+                  boxShadow: remainingSeconds < 180 ? '0 0 15px rgba(239, 68, 68, 0.25)' : 'none',
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>
+                  Expires in {Math.floor(remainingSeconds / 60).toString().padStart(2, '0')}:{(remainingSeconds % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
+            )}
 
             {/* Gateway Error Alert */}
             {error && (

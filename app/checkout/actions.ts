@@ -12,13 +12,15 @@ export async function getCheckoutData(paymentNumber: string) {
   const { data: payment, error } = await db
     .from('payments')
     .select(`
+      id,
       amount, 
       currency_code,
       merchant_id,
       order_id,
       status,
       paid_at,
-      provider_payment_id
+      provider_payment_id,
+      created_at
     `)
     .eq('payment_number', paymentNumber)
     .single()
@@ -27,10 +29,34 @@ export async function getCheckoutData(paymentNumber: string) {
 
   const { data: order } = await db
     .from('orders')
-    .select('provider_order_id, purpose, customer_name')
+    .select('id, provider_order_id, purpose, customer_name, created_at')
     .eq('id', payment.order_id)
     .single()
   const { data: merchant } = await db.from('merchants').select('name').eq('id', payment.merchant_id).single()
+
+  // ⏱️ 15-Minute Expiry Engine (Matches Razorpay / Bank Expiration standard)
+  const createdAtMs = payment.created_at ? new Date(payment.created_at).getTime() : Date.now()
+  const expiryWindowMs = 15 * 60 * 1000 // 15 mins
+  const expiresAtMs = createdAtMs + expiryWindowMs
+  const nowMs = Date.now()
+  let currentStatus = payment.status
+
+  if (nowMs > expiresAtMs && currentStatus !== 'SUCCESS' && currentStatus !== 'success') {
+    currentStatus = 'EXPIRED'
+    await db.from('payments').update({
+      status: 'EXPIRED',
+      failure_code: 'SESSION_EXPIRED',
+      failure_reason: 'Payment link expired after 15 minutes of inactivity',
+      updated_at: new Date().toISOString()
+    }).eq('id', payment.id)
+
+    if (payment.order_id) {
+      await db.from('orders').update({
+        status: 'EXPIRED',
+        updated_at: new Date().toISOString()
+      }).eq('id', payment.order_id)
+    }
+  }
 
   let keyId = process.env.RAZORPAY_KEY_ID || 'dummy'
   const { data: providerRec } = await db
@@ -57,10 +83,12 @@ export async function getCheckoutData(paymentNumber: string) {
     provider_order_id: order?.provider_order_id,
     purpose: order?.purpose || 'Order Checkout',
     customer_name: order?.customer_name,
-    status: payment.status,
+    status: currentStatus,
     paid_at: payment.paid_at,
     provider_payment_id: payment.provider_payment_id,
-    key_id: keyId
+    key_id: keyId,
+    expires_at: new Date(expiresAtMs).toISOString(),
+    remaining_seconds: Math.max(0, Math.floor((expiresAtMs - nowMs) / 1000))
   }
 }
 
@@ -97,6 +125,25 @@ export async function verifyCheckoutPayment(input: VerifyPaymentInput) {
   // Idempotency: If already confirmed, return success immediately
   if (payment.status === 'SUCCESS' || payment.status === 'success') {
     return { verified: true, payment_number: payment.payment_number, status: 'SUCCESS' }
+  }
+
+  // ⏱️ Verify order is not expired (15-minute validity window)
+  const createdAtMs = payment.created_at ? new Date(payment.created_at).getTime() : Date.now()
+  if (Date.now() > createdAtMs + 15 * 60 * 1000) {
+    await db.from('payments').update({
+      status: 'EXPIRED',
+      failure_code: 'SESSION_EXPIRED',
+      failure_reason: 'Payment link expired after 15 minutes of inactivity',
+      updated_at: new Date().toISOString()
+    }).eq('id', payment.id)
+
+    if (payment.order_id) {
+      await db.from('orders').update({
+        status: 'EXPIRED',
+        updated_at: new Date().toISOString()
+      }).eq('id', payment.order_id)
+    }
+    throw new Error('This payment link has expired (15-minute timeout). Please initiate a fresh transaction.')
   }
 
   // 2. Anti-Tampering: Order ID must strictly match database order
@@ -237,4 +284,3 @@ export async function recordPaymentFailureAction(input: RecordFailureInput) {
 
   return { success: true }
 }
-
