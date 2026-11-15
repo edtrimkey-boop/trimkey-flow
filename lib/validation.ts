@@ -31,7 +31,16 @@ export const CreatePaymentSchema = z.object({
       email: z.string().email().optional(),
       phone: z
         .string()
-        .regex(/^[6-9]\d{9}$/, 'Phone must be a 10-digit Indian mobile number')
+        .nullish()
+        .transform((val) => {
+          if (!val) return undefined;
+          const clean = String(val).replace(/\D/g, '');
+          const formatted = clean.length > 10 && clean.startsWith('91') ? clean.slice(-10) : clean;
+          return formatted || undefined;
+        })
+        .refine((val) => !val || /^[6-9]\d{9}$/.test(val), {
+          message: 'Phone must be a 10-digit Indian mobile number',
+        })
         .optional(),
     })
     .optional(),
