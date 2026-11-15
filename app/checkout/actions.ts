@@ -29,10 +29,10 @@ export async function getCheckoutData(paymentNumber: string) {
 
   const { data: order } = await db
     .from('orders')
-    .select('id, provider_order_id, purpose, customer_name, created_at')
+    .select('id, provider_order_id, purpose, customer_name, customer_email, customer_phone, metadata, created_at')
     .eq('id', payment.order_id)
     .single()
-  const { data: merchant } = await db.from('merchants').select('name').eq('id', payment.merchant_id).single()
+  const { data: merchant } = await db.from('merchants').select('name, display_name').eq('id', payment.merchant_id).single()
 
   // ⏱️ 15-Minute Expiry Engine (Matches Razorpay / Bank Expiration standard)
   const createdAtMs = payment.created_at ? new Date(payment.created_at).getTime() : Date.now()
@@ -153,10 +153,14 @@ export async function getCheckoutData(paymentNumber: string) {
   return {
     amount: payment.amount,
     currency: payment.currency_code,
-    merchant_name: merchant?.name || 'Merchant',
+    merchant_name: merchant?.display_name || merchant?.name || 'Merchant',
     provider_order_id: order?.provider_order_id,
     purpose: order?.purpose || 'Order Checkout',
     customer_name: order?.customer_name,
+    customer_email: order?.customer_email,
+    customer_phone: order?.customer_phone,
+    order_created_at: order?.created_at,
+    order_metadata: order?.metadata,
     status: currentStatus,
     paid_at: reconciledPaidAt,
     provider_payment_id: reconciledPaymentId,
