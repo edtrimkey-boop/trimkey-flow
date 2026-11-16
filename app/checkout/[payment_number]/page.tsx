@@ -125,9 +125,9 @@ export default function CheckoutPage() {
           },
         },
         prefill: {
-          name: paymentData.customer_name || 'Customer',
-          email: paymentData.customer_email || 'customer@trimkey.in',
-          contact: paymentData.customer_phone || '9999999999',
+          name: paymentData.customer_name || '',
+          email: paymentData.customer_email || '',
+          contact: paymentData.customer_phone || '',
         },
         theme: {
           color: '#00F5A0',
@@ -252,7 +252,7 @@ export default function CheckoutPage() {
       doc.text(`Total Amount Paid: INR ${formattedAmt}`, 20, 115)
 
       // Customer Details (if present)
-      if (paymentData.customer_name || paymentData.customer_email) {
+      if (paymentData.customer_name || paymentData.customer_email || paymentData.customer_phone) {
         doc.setFont('helvetica', 'bold')
         doc.setFontSize(10)
         doc.text('CUSTOMER INFORMATION', 20, 130)
@@ -260,8 +260,18 @@ export default function CheckoutPage() {
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(9)
         doc.setTextColor(71, 85, 105)
-        if (paymentData.customer_name) doc.text(`Customer Name: ${paymentData.customer_name}`, 20, 138)
-        if (paymentData.customer_email) doc.text(`Customer Email: ${paymentData.customer_email}`, 20, 145)
+        let curY = 138
+        if (paymentData.customer_name) {
+          doc.text(`Customer Name: ${paymentData.customer_name}`, 20, curY)
+          curY += 7
+        }
+        if (paymentData.customer_email) {
+          doc.text(`Customer Email: ${paymentData.customer_email}`, 20, curY)
+          curY += 7
+        }
+        if (paymentData.customer_phone) {
+          doc.text(`Customer Phone: +91 ${paymentData.customer_phone}`, 20, curY)
+        }
       }
 
       // Security Compliance Footer
@@ -800,6 +810,11 @@ export default function CheckoutPage() {
                       </div>
                       <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.75)' }}>
                         Billing to: <strong style={{ color: '#fff' }}>{paymentData.customer_name}</strong>
+                        {(paymentData.customer_email || paymentData.customer_phone) && (
+                          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.45)', marginTop: '2px' }}>
+                            {[paymentData.customer_email, paymentData.customer_phone ? `+91 ${paymentData.customer_phone}` : null].filter(Boolean).join(' • ')}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -882,6 +897,11 @@ export default function CheckoutPage() {
                   <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px' }}>
                     Purpose: <strong style={{ color: '#fff' }}>{paymentData.purpose}</strong>
                   </div>
+                  {paymentData.customer_name && (
+                    <div style={{ color: 'rgba(255, 255, 255, 0.6)', marginBottom: '4px' }}>
+                      Billing to: <strong style={{ color: '#fff' }}>{paymentData.customer_name}</strong>
+                    </div>
+                  )}
                   <div style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
                     Ref: {paymentNumber}
                   </div>

@@ -156,6 +156,12 @@ Trim Key Flow implements a 3-tier safety net to guarantee **zero lost payments**
 ### 8. `services/merchant.ts`
 * **Change:** Updated `getProviderWebhookSecret()` to safely fall back to decrypted credentials without requiring global environment variables.
 
+### 9. `app/checkout/[payment_number]/page.tsx`
+* **Change:** In Razorpay `options.prefill`, bound `name`, `email`, and `contact` directly to `paymentData.customer_name`, `customer_email`, and `customer_phone`.
+* **Change:** Extended PDF receipt generator to render `Customer Phone: +91 ...` alongside customer name and email.
+* **Change:** Enhanced checkout sidebar and mobile purchase summaries to display customer email & phone under `Billing to:`.
+* **Purpose:** Ensures end-to-end customer details prefill cleanly into gateway checkout forms and receipts without dummy placeholders.
+
 ---
 
 ## 7. Developer Cheatsheet & Testing
